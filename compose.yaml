@@ -1,0 +1,50 @@
+services:
+  so-mqtt:
+    image: eclipse-mosquitto:latest
+    container_name: so-mqtt
+    volumes:
+      - ./containers/mqtt/config:/mosquitto/config
+    ports:
+      - "8083:8083"
+  so-api:
+    container_name: so-api
+    build:
+      context: .
+      dockerfile: ./containers/Dockerfile_so-api
+    links:
+      - so-mqtt
+    depends_on:
+      - so-mqtt
+    ports:
+      - "8000:8000"
+    environment:
+      - SO_MCS_ADMIN_PASSWORD=${SO_MCS_ADMIN_PASSWORD}
+  so-master:
+    container_name: so-master
+    build:
+      context: .
+      dockerfile: ./containers/Dockerfile_so-master
+    links:
+      - so-mqtt
+    ports:
+      - "5555:5555"
+    depends_on:
+      - so-mqtt
+  so-mcs:
+    container_name: so-mcs
+    build:
+      context: .
+      dockerfile: ./containers/Dockerfile_so-mcs
+    ports:
+      - "8080:8080"
+    depends_on:
+      - so-api
+    environment:
+      - SO_API=${SO_API}
+      - SO_MQTT=${SO_MQTT}
+      - SO_MQTT_PORT=${SO_MQTT_PORT}
+      - SO_MQTT_PATH=${SO_MQTT_PATH}
+      - SO_MCS_USERNAME=${SO_MCS_USERNAME}
+      - SO_MCS_PASSWORD=${SO_MCS_PASSWORD}
+      - SO_MCS_ADMIN_PASSWORD=${SO_MCS_ADMIN_PASSWORD}
+      - SO_MCS_SIMPLE=${SO_MCS_SIMPLE}

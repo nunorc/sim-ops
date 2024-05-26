@@ -1,0 +1,20 @@
+.app-content-full-width {
+	& .app-content {
+		margin: 0;
+	}
+	& .app-footer {
+		@if ($enable-rtl) {
+			margin-right: $app-content-padding-x;
+		} @else {
+			margin-left: $app-content-padding-x;
+		}
+		
+		@include media-breakpoint-down(md) {
+			@if ($enable-rtl) {
+				margin-right: $app-content-sm-padding-x;
+			} @else {
+				margin-left: $app-content-sm-padding-x;
+			}
+		}
+	}
+}

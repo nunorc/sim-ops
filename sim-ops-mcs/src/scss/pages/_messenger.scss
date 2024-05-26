@@ -1,0 +1,201 @@
+.messenger {
+	height: 100%;
+	display: flex;
+	
+	& .messenger-sidebar {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		
+		@include media-breakpoint-up(lg) {
+			max-width: rem(360px);
+			border-right: 1px solid var(--#{$prefix}border-color);
+		}
+		& .messenger-sidebar-header {
+			border-bottom: 1px solid var(--#{$prefix}border-color);
+			padding: $spacer;
+		}
+		& .messenger-sidebar-body {
+			flex: 1;
+			overflow: hidden;
+		}
+		& .messenger-item {
+			border-bottom: 1px solid var(--#{$prefix}border-color);
+			
+			& .messenger-link {
+				display: flex;
+				padding: $spacer * .85 $spacer;
+				text-decoration: none;
+				color: var(--#{$prefix}inverse);
+				
+				&.active {
+					background-color: rgba(var(--#{$prefix}inverse-rgb), .15);
+				}
+				&:hover,
+				&:focus {
+					background-color: rgba(var(--#{$prefix}inverse-rgb), .1);
+				}
+				
+				& .messenger-media {
+					width: rem(40px);
+					height: rem(40px);
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					
+					& img {
+						max-width: 100%;
+					}
+					
+					& + .messenger-info {
+						padding-left: $spacer * .85;
+					}
+				}
+				& .messenger-info {
+					flex: 1;
+					white-space: nowrap;
+				}
+				& .messenger-time-badge {
+					display: flex;
+					flex-direction: column;
+					white-space: nowrap;
+				}
+				& .messenger-time {
+					font-size: $font-size-sm * .85;
+					color: rgba(var(--#{$prefix}inverse-rgb), .5);
+					margin-bottom: $spacer * .25;
+				}
+				& .messenger-text,
+				& .messenger-name {
+					overflow: hidden;
+					text-overflow: ellipsis;
+					max-width: rem(220px);
+					color: rgba(var(--#{$prefix}inverse-rgb), .5);
+					font-size: $font-size-sm;
+				}
+				& .messenger-name {
+					font-weight: $font-weight-bold;
+					color: var(--#{$prefix}inverse);
+				}
+				& .messenger-badge {
+					background: var(--#{$prefix}theme);
+					color: var(--#{$prefix}theme-color);
+					display: inline-flex;
+					border-radius: rem(30px);
+					padding: 0 rem(3px);
+					min-width: rem(18px);
+					min-height: rem(18px);
+					align-items: center;
+					justify-content: center;
+					font-size: $font-size-base * .65;
+					font-weight: $font-weight-bold;
+					
+					&.empty {
+						display: none;
+					}
+					
+					@if ($enable-rtl) {
+						margin-right: auto;
+					} @else {
+						margin-left: auto;
+					}
+				}
+			}
+		}
+	}
+	& .messenger-content {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		
+		@include media-breakpoint-down(lg) {
+			display: none;
+		}
+		
+		& .messenger-content-header {
+			display: flex;
+			border-bottom: 1px solid var(--#{$prefix}border-color);
+			padding: $spacer * .75 $spacer;
+			align-items: center;
+			
+			& .messenger-content-header-mobile-toggler {
+				display: none;
+				
+				@include media-breakpoint-down(lg) {
+					display: block;
+				}
+				
+				& a {
+					color: rgba(var(--#{$prefix}inverse-rgb), .5);
+					font-size: rem(18px);
+				}
+			}
+			& .messenger-content-header-media {
+				& .media {
+					width: rem(40px);
+					height: rem(40px);
+					border-radius: 40px;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+				}
+				& + .messenger-content-header-info {
+					@if ($enable-rtl) {
+						margin-right: $spacer;
+					} @else {
+						margin-left: $spacer;
+					}
+				}
+			}
+			& .messenger-content-header-info {
+				font-size: $font-size-base;
+				color: var(--#{$prefix}inverse);
+				font-weight: $font-weight-bold;
+				font-size: rem(15px);
+				flex: 1;
+				
+				& small {
+					display: block;
+					color: rgba(var(--#{$prefix}inverse-rgb), .5);
+					font-weight: normal;
+					font-size: rem(11px);
+				}
+			}
+			& .messenger-content-header-btn {
+				display: flex;
+				
+				& .btn {
+					font-size: rem(16px);
+					color: rgba(var(--#{$prefix}inverse-rgb), .5);
+					
+					&:hover,
+					&:focus {
+						color: var(--#{$prefix}inverse);
+					}
+				}
+			}
+		}
+		& .messenger-content-body {
+			flex: 1;
+			overflow: hidden;
+			
+			& .widget-chat {
+				padding: $spacer;
+			}
+		}
+		& .messenger-content-footer {
+			border-top: 1px solid var(--#{$prefix}border-color);
+			padding: $spacer;
+		}
+	}
+	&.messenger-content-toggled {
+		@include media-breakpoint-down(lg) {
+			& .messenger-sidebar {
+				display: none;
+			}
+			& .messenger-content {
+				display: flex;
+			}
+		}
+	}
+}

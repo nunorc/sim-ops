@@ -1,0 +1,17 @@
+.register {
+	min-height: 100vh;
+	padding: $spacer * 3 $spacer;
+	display: flex;
+	align-items: center;
+	
+	@include media-breakpoint-down(md) {
+		padding: $spacer;
+	}
+	
+	& .register-content {
+		flex: 1;
+		max-width: rem(360px);
+		margin: 0 auto;
+		position: relative;
+	}
+}

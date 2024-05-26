@@ -1,0 +1,10 @@
+.app-content-full-height {
+	& .app-content {
+		height: calc(100vh - #{$app-header-height});
+	}
+	&.app-without-header {
+		& .app-content {
+			height: 100vh;
+		}
+	}
+}

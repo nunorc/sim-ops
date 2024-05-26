@@ -1,0 +1,49 @@
+@mixin helper-spacing($direction, $classProperty, $className) {
+	@for $i from 1 through 20 {
+		$classInt: $i;
+		$cssValue: rem($i);
+		$cssProperty: $classProperty;
+		
+		@if ($direction == 'top') {
+			$cssProperty: $classProperty + '-top';
+		} @else if ($direction == 'right') {
+			@if $enable-rtl {
+				$cssProperty: $classProperty + '-left';
+			} @else {
+				$cssProperty: $classProperty + '-right';
+			}
+		} @else if ($direction == 'bottom') {
+			$cssProperty: $classProperty + '-bottom';
+		} @else if ($direction == 'left') {
+			@if $enable-rtl {
+				$cssProperty: $classProperty + '-right';
+			} @else {
+				$cssProperty: $classProperty + '-left';
+			}
+		}
+		@if ($i <= 10) {
+			$classInt: ($i) + px;
+			$cssValue: $i + px;
+		} @else if ($i > 10) {
+			$classInt: (($i - 10) * 5) + px;
+			$cssValue: (($i - 10) * 5) + px;
+		}
+		.#{$className}-#{$classInt} {
+			@if ($direction == 'mx') {
+				margin-left: $cssValue !important;
+				margin-right: $cssValue !important;
+			} @else if ($direction == 'my') {
+				margin-top: $cssValue !important;
+				margin-bottom: $cssValue !important;
+			} @else if ($direction == 'px') {
+				padding-left: $cssValue !important;
+				padding-right: $cssValue !important;
+			} @else if ($direction == 'py') {
+				padding-top: $cssValue !important;
+				padding-bottom: $cssValue !important;
+			} @else {
+				#{$cssProperty}: $cssValue !important;
+			}
+		}
+	}
+}

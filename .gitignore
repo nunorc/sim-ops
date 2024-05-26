@@ -1,0 +1,10 @@
+.env
+.venv
+.vscode
+__pycache__
+*-notes.txt
+*.bsp
+*.old
+sim-ops-lib/data/hist/*json
+.DS_Store
+.pytest_cache

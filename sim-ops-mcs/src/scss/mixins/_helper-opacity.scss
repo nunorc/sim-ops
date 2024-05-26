@@ -1,0 +1,22 @@
+@mixin helper-opacity($from, $to) {
+	@for $i from $from through $to {
+		.opacity-#{$i} {
+			opacity: #{$i * 0.1} !important;
+		}
+		.opacity-#{$i * 15} {
+			opacity: #{$i * 0.15} !important;
+		}
+		.text-opacity-#{$i * 10} {
+			--#{$prefix}text-opacity: #{$i * 0.1};
+		}
+		.text-opacity-#{($i * 10) + 5} {
+			--#{$prefix}text-opacity: #{($i * 0.1) + 0.05};
+		}
+		.bg-opacity-#{$i * 10} {
+			--#{$prefix}bg-opacity: #{$i * 0.1};
+		}
+		.bg-opacity-#{($i * 10) + 5} {
+			--#{$prefix}bg-opacity: #{($i * 0.1) + 0.05};
+		}
+	}
+}

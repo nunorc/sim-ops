@@ -1,0 +1,17 @@
+
+FROM python:3.11-slim
+
+RUN apt-get update
+RUN apt-get install -y libpq-dev gcc
+
+ADD sim-ops-lib/requirements.txt .
+RUN pip install -r requirements.txt
+
+RUN mkdir /app
+COPY sim-ops-lib/ /app
+WORKDIR /app
+
+ENV SO_MCS_ADMIN_PASSWORD ${SO_MCS_ADMIN_PASSWORD}
+
+EXPOSE 8000
+ENTRYPOINT [ "/usr/local/bin/uvicorn", "--host", "0.0.0.0", "--port", "8000", "so.api:app" ]

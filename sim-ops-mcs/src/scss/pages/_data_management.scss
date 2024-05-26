@@ -1,0 +1,30 @@
+.data-management {
+	& .dataTables_wrapper {
+		& .dataTable {
+			margin-top: 0 !important;
+			margin-bottom: 0 !important;
+			color: var(--#{$prefix}body-color);
+		}
+		& .dataTables_filter {
+			text-align: left;
+			margin-bottom: $spacer;
+			font-size: rem(12px);
+			
+			& label {
+				display: flex;
+				align-items: center;
+			}
+			& input {
+				border-radius: $border-radius;
+				font-size: rem(13px);
+				min-width: rem(200px);
+				
+				@include media-breakpoint-down(lg) {
+					min-width: inherit;
+					flex: 1;
+					width: 100%;
+				}
+			}
+		}
+	}
+}

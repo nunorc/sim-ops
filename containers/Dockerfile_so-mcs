@@ -1,0 +1,22 @@
+
+# build stage
+FROM node:20.2.0-bullseye-slim as build-stage
+
+WORKDIR /app
+COPY sim-ops-mcs/package*.json ./
+RUN npm install
+COPY sim-ops-mcs/ .
+RUN npm run build
+
+# production stage
+FROM nginx:stable-alpine as production-stage
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY containers/nginx/default.conf /etc/nginx/conf.d/
+COPY containers/entrypoint.sh /usr/share/nginx/entrypoint.sh
+RUN chmod +x /usr/share/nginx/entrypoint.sh
+RUN apk update && apk add apache2-utils
+
+ENTRYPOINT ["/usr/share/nginx/entrypoint.sh"]
+
+# start nginx
+CMD ["nginx", "-g", "daemon off;"]

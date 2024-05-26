@@ -1,0 +1,12 @@
+requests
+paho-mqtt
+fastapi
+uvicorn
+skyfield
+pytz
+pyzmq
+numpy
+scipy
+pytest
+zmq
+configparser

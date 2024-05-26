@@ -1,0 +1,146 @@
+.profile {
+	& .profile-img {
+		height: rem(200px);
+		overflow: hidden;
+		margin-bottom: $spacer;
+		z-index: 10;
+		
+		& img {
+			max-width: 100%;
+			width: 100%;
+		}
+	}
+	& .profile-tab {
+		position: relative;
+		padding: 0 $spacer * 1.5;
+		flex: 1;
+		
+		@include media-breakpoint-down(lg) {
+			overflow: scroll;
+			padding: 0 $spacer;
+			display: flex;
+			flex-wrap: nowrap;
+		}
+
+		& .nav-item {
+			& .nav-link {
+				text-align: center;
+				
+				& .nav-value {
+					font-size: $font-size-base * 1.5;
+					font-weight: $font-weight-bold;
+					margin-bottom: $spacer * -.35;
+					
+					@include media-breakpoint-down(md) {
+						font-size: $font-size-base * 1.15;
+					}
+				}
+			}
+			& + .nav-item {
+				@if ($enable-rtl) {
+					margin-right: $spacer * 1.5;
+				} @else {
+					margin-left: $spacer * 1.5;
+				}
+			}
+		}
+	}
+	& .profile-container {
+		display: flex;
+		
+		@include media-breakpoint-down(lg) {
+			display: block;
+		}
+		
+		& .profile-sidebar {
+			width: rem(250px);
+			padding: $spacer * 1.5;
+			
+			@if ($enable-rtl) {
+				border-left: 1px solid var(--#{$prefix}border-color);
+			} @else {
+				border-right: 1px solid var(--#{$prefix}border-color);
+			}
+			
+			@include media-breakpoint-down(lg) {
+				display: none;
+			}
+		}
+		& .profile-content {
+			flex: 1;
+			
+			& .profile-content-container {
+				padding: $spacer * 1.5;
+				
+				@include media-breakpoint-down(lg) {
+					padding: $spacer;
+				}
+			}
+		}
+	}
+	& .profile-img-list {
+		list-style-type: none;
+		margin: $spacer * -.25;
+		padding: 0;
+		
+		@include clearfix();
+		
+		& .profile-img-list-item {
+			width: 25%;
+			padding: $spacer * .25;
+			
+			@if ($enable-rtl) {
+				float: right;
+			} @else {
+				float: left;
+			}
+			
+			&.main {
+				width: 50%;
+			}
+			& .profile-img-list-link {
+				display: block;
+				padding-top: 75%;
+				overflow: hidden;
+				position: relative;
+				
+				& img,
+				& .profile-img-content {
+					position: absolute;
+					top: 0;
+					left: 0;
+					right: 0;
+					bottom: 0;
+					max-width: 100%;
+					background-size: cover;
+					background-position: center;
+					background-repeat: no-repeat;
+					
+					&:before {
+						content: '';
+						position: absolute;
+						top: 0;
+						left: 0;
+						right: 0;
+						bottom: 0;
+						border: 1px solid rgba(var(--#{$prefix}inverse-rgb), .15);
+					}
+				}
+			}
+			&.with-number {
+				& .profile-img-number {
+					position: absolute;
+					top: 50%;
+					left: 0;
+					right: 0;
+					color: $white;
+					font-size: $font-size-base * 1.75;
+					font-weight: $font-weight-bold;
+					line-height: rem(26px);
+					margin-top: $font-size-base * -1.75 * .5;
+					text-align: center;
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,19 @@
+@mixin helper-size($className, $classProperty) {
+	@for $i from 1 through 40 {
+		$classInt: $i * 5;
+		
+		.#{$className}-#{$classInt}px {
+			#{$classProperty}: $classInt + px !important;
+		}
+		.#{$className}-#{$i}px {
+			#{$classProperty}: $i + px !important;
+		}
+	}
+	@for $i from 5 through 12 {
+		$classInt: $i * 50;
+		
+		.#{$className}-#{$classInt}px {
+			#{$classProperty}: $classInt + px !important;
+		}
+	}
+}

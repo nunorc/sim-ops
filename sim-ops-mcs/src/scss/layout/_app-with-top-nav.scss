@@ -1,0 +1,19 @@
+.app-with-top-nav {
+	@include media-breakpoint-up(md) {
+		padding-top: $app-top-nav-height + $app-header-height;
+		
+		& .app-sidebar {
+			top: $app-top-nav-height + $app-header-height;
+		}
+	}
+	
+	&.app-without-header {
+		@include media-breakpoint-up(md) {
+			padding-top: $app-top-nav-height;
+		
+			& .app-sidebar {
+				top: $app-top-nav-height;
+			}
+		}
+	}
+}

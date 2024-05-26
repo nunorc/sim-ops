@@ -1,0 +1,59 @@
+@keyframes appSidebarExpand {
+	@if ($enable-rtl) {
+		from { margin-right: -$app-sidebar-width; }
+		to { margin-right: 0; }
+	} @else {
+		from { margin-left: -$app-sidebar-width; }
+		to { margin-left: 0; }
+	}
+}
+@keyframes appContentExpand {
+	@if ($enable-rtl) {
+		from { margin-right: 0; }
+		to { margin-right: $app-sidebar-width; }
+	} @else {
+		from { margin-left: 0; }
+		to { margin-left: $app-sidebar-width; }
+	}
+}
+@keyframes appFooterExpand {
+	@if ($enable-rtl) {
+		from { margin-right: $app-content-padding-x; }
+		to { margin-right: $app-sidebar-width + $app-content-padding-x; }
+	} @else {
+		from { margin-left: $app-content-padding-x; }
+		to { margin-left: $app-sidebar-width + $app-content-padding-x; }
+	}
+}
+
+.app-sidebar-toggled {
+	@include media-breakpoint-up(md) {
+		& .app-sidebar {
+			animation: appSidebarExpand 0.15s both cubic-bezier(0.7, 0, 0.3, 1);
+			
+			@if ($enable-rtl) {
+				margin-right: 0;
+			} @else {
+				margin-left: 0;
+			}
+		}
+		& .app-content {
+			animation: appContentExpand 0.15s both cubic-bezier(0.7, 0, 0.3, 1);
+			
+			@if ($enable-rtl) {
+				margin-right: $app-sidebar-width;
+			} @else {
+				margin-left: $app-sidebar-width;
+			}
+		}
+		& .app-footer {
+			animation: appFooterExpand 0.15s both cubic-bezier(0.7, 0, 0.3, 1);
+			
+			@if ($enable-rtl) {
+				margin-right: $app-sidebar-width + $app-content-padding-x;
+			} @else {
+				margin-left: $app-sidebar-width + $app-content-padding-x;
+			}
+		}
+	}
+}
