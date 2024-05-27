@@ -6,7 +6,7 @@ a minimalist spacecraft simulator, a ground station simulator and a Monitoring a
 Note, that the software suite is under constant development so things change fast. The following video
 illustrates the MCS UI.
 
-https://github.com/nunorc/sim-ops/assets/118554/82d92168-ed7e-46f9-ac71-f78d44988842
+https://github.com/nunorc/sim-ops/assets/118554/2ff0d284-ef00-4299-83dd-374d9f3339cc
 
 Repository content:
 
