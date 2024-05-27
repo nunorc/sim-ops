@@ -28,6 +28,12 @@ content in the `.env` file, or by using the option `--env-file`, for example to 
     sim-ops$ docker compose --env-file .env.local up
     # mcs is available from http://localhost:8080
 
+The default credentials for the basic authentication are:
+
+    Username: sim
+    Password: ops
+
+The default password for the admin section in the MCS is `admin`.
 In case you are running behind a reverse proxy, firewall, or any similar setting you may need to update the values
 described in `.env.local` to your needs.
 
