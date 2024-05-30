@@ -46,7 +46,7 @@ A Python (version 3.11 recommended) needs to be available, the list of required 
 Once an MQTT is running and reachable and all the requirements installed, run:
 
     # setup environment variables (required for all scripts and npm)
-    sim-ops$ . scripts/export.env.dev.sh .env.local
+    sim-ops$ . scripts/export-env.sh .env.local
 
     sim-ops$ cd sim-ops-lib
 
