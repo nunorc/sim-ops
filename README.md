@@ -45,6 +45,9 @@ A Python (version 3.11 recommended) needs to be available, the list of required 
 
 Once an MQTT is running and reachable and all the requirements installed, run:
 
+    # setup environment variables (required for all scripts and npm)
+    sim-ops$ . scripts/export.env.dev.sh .env.local
+
     sim-ops$ cd sim-ops-lib
 
     # run master script
@@ -57,6 +60,7 @@ Once an MQTT is running and reachable and all the requirements installed, run:
     
     # run mcs
     sim-ops-mcs$ npm run dev
+    # mcs is available from http://localhost:5173
 
 Running Python lib tests:
 

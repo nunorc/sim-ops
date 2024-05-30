@@ -49,7 +49,7 @@ def _admin_status(admin_pw: str):
     if _valid_auth(admin_pw):
         return _control({ 'system': 'admin', 'control': 'status', 'value': 'null' })
     else:
-        raise HTTPException(status_code=405, detail='Requires admin auth:'+MCS_ADMIN_PW)
+        raise HTTPException(status_code=405, detail='Requires admin auth:')
 
 @app.post('/admin', status_code=200)
 async def _admin(admin_pw: str, request: Request):
@@ -59,13 +59,12 @@ async def _admin(admin_pw: str, request: Request):
     else:
         raise HTTPException(status_code=405, detail='Requires admin auth.')
 
-@app.post('/control', status_code=200)
-async def _ground_stations_control(admin_pw: str, request: Request):
-    if _valid_auth(admin_pw):
-        body = await request.json()
-        return _control(body)
-    else:
-        raise HTTPException(status_code=405, detail='Requires admin auth.')
+@app.post('/control')
+async def _ground_stations_control(request: Request):
+    body = await request.json()
+    result = _control(body)
+
+    return result
 
 @app.get('/admin/hist')
 def _control_hist():

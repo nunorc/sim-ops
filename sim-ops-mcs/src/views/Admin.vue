@@ -62,7 +62,6 @@ export default {
 	methods: {
 		handleAuth() {
 			this.admin_pw = document.getElementById("password").value;
-			console.log('handleAtuh:'+this.admin_pw)
 			this.adminStatus();
 		},
 		resetAuth() {
