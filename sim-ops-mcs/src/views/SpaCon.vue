@@ -27,47 +27,86 @@ export default {
 			control_recv_loading: false,
 			file_upload: null,
 			ul_state: 'NO_RF',
-			mqtt_status: "checking"
+			mqtt_status: "checking",
+			manual_stack: [ { 'command': 'none' }, { 'command': 'none' }, { 'command': 'none' } ],
+			tc_history: [ ['none', ' '], ['none', ' '], ['none', ' '] ],
+			is_armed: false
 		}
 	},
 	methods: {
-		sendCommand(type) {
-			let title = type;
-			if (type=='db')
-				title = document.getElementById("exampleFormControlSelect1").value
-
-			let item = { title: title, time: 'just now', badge: 'QUEUE', highlight: false };
-			this.activityLog.push(item);
-		},
-		disableButtons() {
-			document.querySelectorAll(".btn-sm").forEach(element => {
-				element.disabled = true;
-			});
-			document.getElementById("lock").classList.toggle('d-none');
-			document.getElementById("lock-open").classList.toggle('d-none');
-		},
-		enableButtons() {
-			document.querySelectorAll(".btn-sm").forEach(element => {
-				element.disabled = false;
-			});
-			document.getElementById("lock").classList.toggle('d-none');
-			document.getElementById("lock-open").classList.toggle('d-none');
-		},
-		sendCommand(command, control, value, event) {
-			let button = event.target;
-
-			button.disabled = true;
-			this.control_send = `${command}`;
-			this.control_recv = '';
-			this.control_recv_loading = true;
-
+		addStack(command, control, value, event) {
 			let body = { 'system': 'spacecraft',  'control': control, 'value': value, 'command': command };
+
+			for (let i=0; i<3; i++) {
+				if (this.manual_stack[i].command == 'none') {
+					this.manual_stack[i] = body;
+					break;
+				}
+			}
+		},
+		lenStack() {
+			let c = 0;
+			this.manual_stack.forEach((el) => {
+				if (el.command != 'none')
+					c = c + 1;
+			});
+			return c;
+		},
+		armButton() {
+			this.is_armed = true;
+			this.toggleArm();
+		},
+		toggleArm() {
+			const b = document.getElementById("arm-button"),
+				  r = document.getElementById("manual-stack").rows[0],
+				  c = r.cells[0];
+
+			c.classList.toggle("text-warning");
+			c.classList.toggle("text-success");
+			c.classList.toggle("app-tc-loaded");
+			c.classList.toggle("app-tc-armed");
+		},
+		goButton() {
+			let body = this.manual_stack[0];
+			this.manual_stack[0] = this.manual_stack[1];
+			this.manual_stack[1] = this.manual_stack[2];
+			this.manual_stack[2] = { 'command': 'none' };
+
+			this.toggleArm();
+			this.tc_history[2] = this.tc_history[1];
+			this.tc_history[1] = this.tc_history[0];
+			this.tc_history[0] = [body.command, '_'];
+			this.sendCommand(body);
+		},
+		sendCommand(body) {
 			axios.post(`${appOption.soAPI}/control`, body)
 				.then((resp) => {
-					this.control_recv = resp.data.status;
-					button.disabled = false;
-					this.control_recv_loading = false;
+					this.tc_history[0][1] = this.resCommand(resp.data.status);
+					this.is_armed = false;
 				})
+		},
+		resCommand(status) {
+			let split_1 = status.split(' ');
+
+			let parts = [];
+			split_1.forEach((sp) => {
+				let split_2 = sp.split(':');
+				let class_ = 'text-theme';
+				if (split_2[0]=='w')
+					class_ = 'text-warning';
+				if (split_2[0]=='r')
+					class_ = 'text-danger';
+
+				parts.push(`<span class='${class_}'>${split_2[1]}</span>`);
+			})
+
+			return parts.join('&nbsp;&nbsp;');
+		},
+		delCommand(i) {
+			console.log('del command '+i);
+			this.manual_stack = this.manual_stack.slice(0, i).concat(this.manual_stack.slice(i+1));
+			this.manual_stack[2] = { 'command': 'none' };
+			return false;
 		},
 		fileUpload(type, event) {
 			this.control_send = `upload ${type} ${this.file_upload}`;
@@ -84,8 +123,6 @@ export default {
 					this.control_recv = resp.data.status;
 					this.control_recv_loading = false;
 				})
-			
-
 		},
 		onFileChange(event) {
 			const files = event.target.files;
@@ -123,15 +160,15 @@ export default {
 		// subscribe to spacecraft topic to get state updates
 		this.$mqtt.subscribe("spacecraft", (message) => {
 			try {
-			let data = JSON.parse(message);
-			const dt = new Date(data.ts*1000).toISOString(),
-				      dt_str = dt.replace('T', ' ').replace('Z','') + ' UTC';
-			document.getElementById("dt-now").innerHTML = dt_str;
+				let data = JSON.parse(message);
+				const dt = new Date(data.ts*1000).toISOString(),
+						dt_str = dt.replace('T', ' ').replace('Z','') + ' UTC';
+				document.getElementById("dt-now").innerHTML = dt_str;
 
-			if (data) {
-				this.ul_state = data.ul_state;
-				this.loading = false;
-			}
+				if (data) {
+					this.ul_state = data.ul_state;
+					this.loading = false;
+				}
 			}
 			catch (err) {
 				console.log(err);
@@ -146,11 +183,6 @@ export default {
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
 		SpaCon <small>Spacecraft Controller</small>
 		<small class="float-end">
-			<!-- <span class="badge rounded-0 bg-secondary">U/L State</span>
-			<span v-if="ul_state" class="badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': ul_state==='NO_RF', 'text-bg-warning': ul_state==='PLL_LOCK' || ul_state==='PSK_LOCK' || ul_state==='BIT_LOCK', 'text-bg-success': ul_state==='FRAME_LOCK' }">{{ ul_state }}</span>
-			<span v-else class="badge rounded-0 bg-dark">_</span> -->
-			<button @click="enableButtons" type="button" class="btn btn btn-outline-warning visible ms-2" id="lock" style="width: 84px;">ARM</button>
-			<button @click="disableButtons" type="button" class="btn btn btn-outline-theme visible d-none ms-2" id="lock-open" style="width: 84px;">DISARM</button>
 		</small>
 	</h1>
 	<hr class="mb-4">
@@ -218,111 +250,130 @@ export default {
 			</div>
 		</div>
 	</div>
-<div class="row">
-<div class="col-xl-12 col-lg-12">
-<card class="mb-3">
-<card-header class="card-header fw-bold small text-center p-1">TC Send</card-header>
-<card-body>
-	<div class="row mt-1" v-if="renderComponent">
-		<div class="col">
-			<h6 class="mt-2 mb-0">AOCS</h6>
-			<button @click="sendCommand('TC_AOCS_001', 'aocs_mode', 'SUN', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="AOCS Mode SUN">TC_AOCS_001</button>
-			<!-- <button @click="sendCommand('TC_AOCS_002', 'aocs_mode', 'TARGET', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled>TC_AOCS_002</button> -->
-			<button @click="sendCommand('TC_AOCS_002', 'aocs_mode', 'NADIR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="AOCS Mode NADIR">TC_AOCS_002</button>
-			<!-- <button @click="sendCommand('TC_AOCS_004', 'aocs_mode', 'RATEDAMPING', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled>TC_AOCS_004</button> -->
-			<!-- <button @click="sendCommand('TC_AOCS_005', 'aocs_mode', 'MONITORING', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled>TC_AOCS_005</button> -->
-			<button @click="sendCommand('TC_AOCS_011', 'aocs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="AOCS Chain A">TC_AOCS_011</button>
-			<button @click="sendCommand('TC_AOCS_012', 'aocs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="AOCS Chain B">TC_AOCS_012</button>
-		</div>
-	</div>
-	<div class="row mt-1" v-if="renderComponent">
-		<div class="col">
-			<h6 class="mt-2 mb-0">TTC</h6>
-			<button @click="sendCommand('TC_TTC_001', 'ttc_mode', 'SLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="TTC SLBR">TC_TTC_001</button>
-			<button @click="sendCommand('TC_TTC_002', 'ttc_mode', 'SHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="TTC SHBR">TC_TTC_002</button>
-			<button @click="sendCommand('TC_TTC_003', 'ttc_mode', 'XLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="TTC XLBR">TC_TTC_003</button>
-			<button @click="sendCommand('TC_TTC_004', 'ttc_mode', 'XHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="TTC XHBR">TC_TTC_004</button>
-			<button @click="sendCommand('TC_TTC_011', 'ttc_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="TTC Chain A">TC_TTC_011</button>
-			<button @click="sendCommand('TC_TTC_012', 'ttc_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="TTC Chain B">TC_TTC_012</button>
-			<button @click="sendCommand('TC_TTC_021', 'ttc_ping_ack', '', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Ping">TC_TTC_021</button>
-			<button @click="sendCommand('TC_TTC_022', 'ttc_coherent', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Set Coherent">TC_TTC_022</button>
-			<button @click="sendCommand('TC_TTC_031', 'ttc_tx_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Transmitter ON">TC_TTC_031</button>
-			<button @click="sendCommand('TC_TTC_032', 'ttc_tx_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Transmitter OFF">TC_TTC_032</button>
-		</div>
-	</div>
-	<div class="row mt-1" v-if="renderComponent">
-		<div class="col">
-			<h6 class="mt-2 mb-0">PTS</h6>
-			<button @click="sendCommand('TC_PTS_001', 'pts_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="PTS Chain A">TC_PTS_001</button>
-			<button @click="sendCommand('TC_PTS_002', 'pts_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="PTS Chain B">TC_PTS_002</button>
-			<button @click="sendCommand('TC_PTS_011', 'pts_sol_array__0', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Enable Array 1">TC_PTS_011</button>
-			<button @click="sendCommand('TC_PTS_012', 'pts_sol_array__0', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Disable Array 1">TC_PTS_012</button>
-			<button @click="sendCommand('TC_PTS_021', 'pts_sol_array__1', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Enable Array 2">TC_PTS_021</button>
-			<button @click="sendCommand('TC_PTS_022', 'pts_sol_array__1', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Disable Array 2">TC_PTS_022</button>
-		</div>
-	</div>
-	<div class="row mt-1" v-if="renderComponent">
-		<div class="col">
-			<h6 class="mt-2 mb-0">DHS</h6>
-			<button @click="sendCommand('TC_DHS_001', 'dhs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="DHS Chain A">TC_DHS_001</button>
-			<button @click="sendCommand('TC_DHS_002', 'dhs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="DHS Chain B">TC_DHS_002</button>
-			<button @click="sendCommand('TC_DHS_011', 'dhs_obsw_mode', 'safe', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Safe Mode">TC_DHS_011</button>
-			<button @click="sendCommand('TC_DHS_012', 'dhs_obsw_mode', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Nominal Mode">TC_DHS_012</button>
-			<button @click="sendCommand('TC_DHS_021', 'dhs_mem_dump_enabled', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Start Memory Dump">TC_DHS_021</button>
-			<button @click="sendCommand('TC_DHS_022', 'dhs_mem_dump_enabled', false, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Stop Memory Dump">TC_DHS_022</button>
-		</div>
-	</div>
-	<div class="row mt-1" v-if="renderComponent">
-		<div class="col">
-			<h6 class="mt-2 mb-0">Payload</h6>
-			<button @click="sendCommand('TC_PL_001', 'pl_gps_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="GPS ON">TC_PL_001</button>
-			<button @click="sendCommand('TC_PL_002', 'pl_gps_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="GPS OFF">TC_PL_002</button>
-			<button @click="sendCommand('TC_PL_011', 'pl_camera_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" disabled v-b-tooltip.hover title="Camera ON">TC_PL_011</button>
-			<button @click="sendCommand('TC_PL_012', 'pl_camera_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-1 mt-2" disabled v-b-tooltip.hover title="Camera OFF">TC_PL_012</button>
-		</div>
-	</div>
-</card-body>
-</card>
-</div>
-</div>
 
-	<div class="row mt-2" v-if="renderComponent">
-		<div class="col-xl-8 col-lg-8">
+	<div class="row">
+		<div class="col-xl-6 col-lg-6">
 			<card class="mb-3">
-				<card-header class="card-header fw-bold small text-center p-1">DHS CFDP Command Files Upload</card-header>
-				<card-body class="text-center">
-					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal1()" disabled>Attitude Control</button>
-					<span>&nbsp;&nbsp;</span>
-					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal2()" disabled>Orbit Control</button>
-					<span>&nbsp;&nbsp;</span>
-					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal3()" disabled>Science Control</button>
+				<card-header class="card-header fw-bold small text-center p-1">TC Manual Stack</card-header>
+				<card-body>
+					<div class="row">
+						<div class="col-xl-8 col-lg-8">
+							<table id="manual-stack" class="table table-sm mb-2px small text-nowrap">
+								<tbody>
+									<tr v-for="(item, i) in manual_stack">
+										<td :class="{ 'text-success': manual_stack[i].command != 'none', 'app-tc-loaded': manual_stack[i].command != 'none' }">{{ item.command }}</td>
+										<td class="text-end">
+											<a href="#" @click="delCommand(i)" v-if="item.command != 'none'">
+											<i class="fas fa-times text-danger"></i></a>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="col-xl-4 col-lg-4 text-center">
+							<button @click="armButton" id="arm-button" type="button" class="btn btn-outline-warning ms-2 mt-2" :disabled="lenStack() == 0" style="width: 94px;">ARM</button>
+							<button @click="goButton" id="go-button" type="button" class="btn btn-outline-success ms-2 mt-2" :disabled="!is_armed" style="width: 94px;">GO</button>
+						</div>
+					</div>
 				</card-body>
 			</card>
 		</div>
-		<div class="col-xl-4 col-lg-4">
+		<div class="col-xl-6 col-lg-6">
 			<card class="mb-3">
-				<card-header class="card-header fw-bold small text-center p-1">TC Console</card-header>
-				<card-body class="p-1 mx-2">
-					<table class="table table-sm table-striped table-borderless mb-2px small text-nowrap">
+				<card-header class="card-header fw-bold small text-center p-1">TC History</card-header>
+				<card-body>
+					<table class="table table-sm mb-2px small text-nowrap">
 						<tbody>
-							<tr><td><span>&nbsp;[Send]&nbsp;</span><span>{{ control_send }}</span></td></tr>
-							<tr><td><span>&nbsp;[Recv]&nbsp;</span>
-								<span v-if="control_recv_loading" class="spinner-border spinner-border-sm text-secondary" role="status"><span class="visually-hidden">Loading...</span></span>
-								<!-- <span class="fw-bold" :class="{ 'text-theme': control_recv==='OK', 'text-danger': control_recv!=='OK'}">{{ control_recv }}</span> -->
-								<span v-if="control_recv.length>0" class="fw-bold" :class="{ 'text-theme': control_recv.split(' ')[0].split(':')[0]==='g', 'text-danger': control_recv.split(' ')[0].split(':')[0]==='r'}">{{ control_recv.split(' ')[0].split(':')[1] }}</span>&nbsp;
-								<span v-if="control_recv.length>0" class="fw-bold" :class="{ 'text-theme': control_recv.split(' ')[1].split(':')[0]==='g', 'text-danger': control_recv.split(' ')[1].split(':')[0]==='r', 'text-warning': control_recv.split(' ')[2].split(':')[0]==='w'}">{{ control_recv.split(' ')[1].split(':')[1] }}</span>&nbsp;
-								<span v-if="control_recv.length>0" class="fw-bold" :class="{ 'text-theme': control_recv.split(' ')[2].split(':')[0]==='g', 'text-danger': control_recv.split(' ')[2].split(':')[0]==='r', 'text-warning': control_recv.split(' ')[2].split(':')[0]==='w' }">{{ control_recv.split(' ')[2].split(':')[1] }}</span>
-							</td></tr>
+							<tr v-for="(item, i) in tc_history">
+								<td>{{ item[0] }}</td>
+								<td v-if="item[1] == '_'" class="text-end fw-bold">{{  item[1] }}</td>
+								<td v-if="item[1] != '_'" v-html="item[1]" class="text-end fw-bold"></td>
+							</tr>
 						</tbody>
 					</table>
 				</card-body>
 			</card>
 		</div>
 	</div>
+
+	<div class="row">
+		<div class="col-xl-8 col-lg-8">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">TC Database</card-header>
+				<card-body>
+					<div class="row mt-1" v-if="renderComponent">
+						<div class="col">
+							<h6 class="mt-2 mb-0">AOCS</h6>
+							<button @click="addStack('TC_AOCS_001', 'aocs_mode', 'SUN', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="AOCS Mode SUN">TC_AOCS_001</button>
+							<button @click="addStack('TC_AOCS_002', 'aocs_mode', 'NADIR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="AOCS Mode NADIR">TC_AOCS_002</button>
+							<button @click="addStack('TC_AOCS_011', 'aocs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="AOCS Chain A">TC_AOCS_011</button>
+							<button @click="addStack('TC_AOCS_012', 'aocs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="AOCS Chain B">TC_AOCS_012</button>
+						</div>
+						<div class="col">
+							<h6 class="mt-2 mb-0">TTC</h6>
+							<button @click="addStack('TC_TTC_001', 'ttc_mode', 'SLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC SLBR">TC_TTC_001</button>
+							<button @click="addStack('TC_TTC_002', 'ttc_mode', 'SHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC SHBR">TC_TTC_002</button>
+							<button @click="addStack('TC_TTC_003', 'ttc_mode', 'XLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC XLBR">TC_TTC_003</button>
+							<button @click="addStack('TC_TTC_004', 'ttc_mode', 'XHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC XHBR">TC_TTC_004</button>
+							<button @click="addStack('TC_TTC_011', 'ttc_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC Chain A">TC_TTC_011</button>
+							<button @click="addStack('TC_TTC_012', 'ttc_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC Chain B">TC_TTC_012</button>
+						</div>
+						<div class="col">
+							<h6 class="mt-2 mb-0">TTC</h6>
+							<button @click="addStack('TC_TTC_021', 'ttc_ping_ack', '', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Ping">TC_TTC_021</button>
+							<button @click="addStack('TC_TTC_022', 'ttc_coherent', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set Coherent">TC_TTC_022</button>
+							<button @click="addStack('TC_TTC_031', 'ttc_tx_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Transmitter ON">TC_TTC_031</button>
+							<button @click="addStack('TC_TTC_032', 'ttc_tx_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Transmitter OFF">TC_TTC_032</button>
+						</div>
+						<div class="col">
+							<h6 class="mt-2 mb-0">PTS</h6>
+							<button @click="addStack('TC_PTS_001', 'pts_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="PTS Chain A">TC_PTS_001</button>
+							<button @click="addStack('TC_PTS_002', 'pts_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="PTS Chain B">TC_PTS_002</button>
+							<button @click="addStack('TC_PTS_011', 'pts_sol_array__0', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Array 1">TC_PTS_011</button>
+							<button @click="addStack('TC_PTS_012', 'pts_sol_array__0', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Array 1">TC_PTS_012</button>
+							<button @click="addStack('TC_PTS_021', 'pts_sol_array__1', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Array 2">TC_PTS_021</button>
+							<button @click="addStack('TC_PTS_022', 'pts_sol_array__1', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Array 2">TC_PTS_022</button>
+						</div>
+						<div class="col">
+							<h6 class="mt-2 mb-0">DHS</h6>
+							<button @click="addStack('TC_DHS_001', 'dhs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="DHS Chain A">TC_DHS_001</button>
+							<button @click="addStack('TC_DHS_002', 'dhs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="DHS Chain B">TC_DHS_002</button>
+							<button @click="addStack('TC_DHS_011', 'dhs_obsw_mode', 'safe', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Safe Mode">TC_DHS_011</button>
+							<button @click="addStack('TC_DHS_012', 'dhs_obsw_mode', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Nominal Mode">TC_DHS_012</button>
+							<button @click="addStack('TC_DHS_021', 'dhs_mem_dump_enabled', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Start Memory Dump">TC_DHS_021</button>
+							<button @click="addStack('TC_DHS_022', 'dhs_mem_dump_enabled', false, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Stop Memory Dump">TC_DHS_022</button>
+						</div>
+						<div class="col">
+							<h6 class="mt-2 mb-0">Payload</h6>
+							<button @click="addStack('TC_PL_001', 'pl_gps_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="GPS ON">TC_PL_001</button>
+							<button @click="addStack('TC_PL_002', 'pl_gps_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="GPS OFF">TC_PL_002</button>
+							<button @click="addStack('TC_PL_011', 'pl_camera_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Camera ON">TC_PL_011</button>
+							<button @click="addStack('TC_PL_012', 'pl_camera_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-1 mt-2" title="Camera OFF">TC_PL_012</button>
+						</div>
+					</div>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-4 col-lg-4">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">CFDP Command Files Upload</card-header>
+				<card-body class="text-center">
+					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal1()">Attitude Control</button>
+					<span>&nbsp;&nbsp;</span>
+					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal2()">Orbit Control</button>
+					<span>&nbsp;&nbsp;</span>
+					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal3()">Science Control</button>
+				</card-body>
+			</card>
+		</div>
+	</div>
+
 </template>
 
 <style>
 .app-w-100 { width: 100%; }
 .app-w-80 { width: 86px; height: 60px; }
 .app-fs-small { font-size: small; }
+tr:has(.app-tc-loaded) { border-bottom: 1px solid #3cd2a5; }
+tr:has(.app-tc-armed) { border-bottom: 1px solid #ff9f0c; }
 </style>
