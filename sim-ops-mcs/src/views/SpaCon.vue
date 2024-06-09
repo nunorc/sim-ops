@@ -73,10 +73,13 @@ export default {
 			this.manual_stack[2] = { 'command': 'none' };
 
 			this.toggleArm();
+			this.updateHistory(body.command);
+			this.sendCommand(body);
+		},
+		updateHistory(command) {
 			this.tc_history[2] = this.tc_history[1];
 			this.tc_history[1] = this.tc_history[0];
-			this.tc_history[0] = [body.command, '_'];
-			this.sendCommand(body);
+			this.tc_history[0] = [command, '_'];
 		},
 		sendCommand(body) {
 			axios.post(`${appOption.soAPI}/control`, body)
@@ -117,11 +120,11 @@ export default {
 			this.closeModal2();
 			this.closeModal3();
 
+			this.updateHistory(`DHS_Uplink ${type}`);
 			let body = { 'system': 'spacecraft',  'control': 'dhs_uploaded', 'value': `${type} > ${this.file_upload}`, 'command': `uploaded: ${type} > ${this.file_upload}` };
 			axios.post(`${appOption.soAPI}/control`, body)
 				.then((resp) => {
-					this.control_recv = resp.data.status;
-					this.control_recv_loading = false;
+					this.tc_history[0][1] = this.resCommand(resp.data.status);
 				})
 		},
 		onFileChange(event) {
