@@ -84,7 +84,12 @@ export default {
 					}
 					else {
 						this.renderComponent = false;
+						document.getElementById("auth-result").innerHTML = "Wrong password!";
 					}
+				})
+				.catch(() => {
+					this.renderComponent = false;
+					document.getElementById("auth-result").innerHTML = "Wrong password!";
 				})
 		},
 		adminRun(control, value, event) {
@@ -281,9 +286,6 @@ export default {
 				<card-body>
 					<table class="table table-sm table-borderless mb-2px small">
 						<tbody v-if="data">
-							<!-- <tr v-if="state && state.tc_history.length === 0">
-								<td>None</td>
-							</tr> -->
 							<tr v-for="(v, k) in data[name]">
 								<td>{{ k }}</td><td><code>{{ v }}</code></td>
 							</tr>

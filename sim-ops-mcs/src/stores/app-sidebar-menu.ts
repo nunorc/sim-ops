@@ -24,7 +24,7 @@ export const useAppSidebarMenuStore = defineStore({
       'text': 'DHS'
     }, {
       'url': '/payload',
-      'icon': 'fas fa-camera-retro',
+      'icon': 'bi bi-columns-gap',
       'text': 'Payload'
     }, {
       'text': 'Monitoring',
@@ -37,10 +37,6 @@ export const useAppSidebarMenuStore = defineStore({
       'url': '/ground_station',
       'icon': 'fa-solid fa-satellite-dish',
       'text': 'Ground Station'
-    // }, {
-    //   'url': '/position',
-    //   'icon': 'fa-solid fa-satellite-dish',
-    //   'text': 'Position'
     }, {
       'text': 'Control',
       'is_header': true
