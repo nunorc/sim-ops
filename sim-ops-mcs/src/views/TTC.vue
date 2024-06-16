@@ -47,6 +47,8 @@ export default {
 		}
 	},
 	mounted() {
+		this.compact = JSON.parse(sessionStorage.getItem('compact')) || false;
+
 		this.mqtt_status = this.$mqtt.status();
 
 		// subscribe to ground station topic to get state updates
@@ -77,24 +79,20 @@ export default {
 </script>
 <template>
 
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
-		TTC <small>Telemetry, Tracking & Command</small>
+		TTC <small class="d-none d-md-inline">Telemetry, Tracking & Command</small>
 		<small class="float-end">
-			<!-- <span class="badge rounded-0 bg-secondary">Last Update</span>
-			<span class="badge rounded-0 bg-dark" style="margin-right: 10px;">{{ dt.replace('T', ' ').replace('Z','') }} UTC</span> -->
 			<span class="badge rounded-0 bg-secondary">MQTT</span>
 			<span class="badge rounded-0" :class="{ 'bg-success': mqtt_status === 'connected', 'bg-danger': mqtt_status !== 'connected' }">{{ mqtt_status }}</span>
-			<span class="badge rounded-0 bg-secondary ms-2">D/L State</span>
+			<span class="badge rounded-0 bg-secondary ms-1">D/L State</span>
 			<span v-if="status_dl" class="badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': status_dl==='NO_RF', 'text-bg-warning': status_dl==='PLL_LOCK' || status_dl==='PSK_LOCK' || status_dl==='BIT_LOCK', 'text-bg-success': status_dl==='FRAME_LOCK' }">{{ status_dl }}</span>
 			<span v-else class="badge rounded-0 bg-dark">_</span>
 		</small>
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
-	<div class="row" v-if="renderComponent">
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">TTC Chain</card-header>
@@ -144,7 +142,7 @@ export default {
 		</div>
 	</div>
 
-	<div class="row" v-if="renderComponent">
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">U/L SNR</card-header>
@@ -169,6 +167,54 @@ export default {
 		</div>
 	</div>
 
+	<div class="row" v-if="renderComponent && compact">
+		<div class="col-sm-4">
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td class="app-w-col">TTC Chain</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.ttc_chain }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>TTC Mode</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.ttc_mode }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>U/L Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK' || state.ttc_state_ul==='PSK_LOCK' || state.ttc_state_ul==='BIT_LOCK', 'text-bg-success': state.ttc_state_ul==='FRAME_LOCK' }">{{ state.ttc_state_ul }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>U/L SNR</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.ttc_snr_ul && state.ttc_snr_ul > -4 && state.ttc_state_ul !== 'NO_RF' ? state.ttc_snr_ul.toFixed(1) : '_' }} <small style="text-transform: none;">dBm</small></div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>TX Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-theme': state.ttc_tx_status === 'on', 'text-bg-danger': state.ttc_tx_status !== 'on' }">{{ state.ttc_tx_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Coherent</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-success': state.ttc_coherent, 'text-bg-danger': !state.ttc_coherent}">{{ state.ttc_coherent }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Ping Ack</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'bg-dark': state.ttc_ping_ack===0, 'text-bg-success': state.ttc_ping_ack>0}">{{ state.ttc_ping_ack }}</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+		</div>
+	</div>
+
 	<div class="row mt-3" v-if="renderComponent">
 		<div class="col">
 			<span class="badge rounded-0 bg-secondary">Last Update</span>
@@ -179,6 +225,8 @@ export default {
 </template>
 
 <style>
+.app-w-col { width: 70%; }
+.app-badge { font-size: 0.7rem; font-weight: 600; text-align: center; padding: 2px; }
 .app-w-100 { width: 100%; }
 .app-w-80 { width: 86px; height: 60px; }
 .app-fs-small { font-size: small; }

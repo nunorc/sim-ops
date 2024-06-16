@@ -25,7 +25,6 @@ const router = createRouter({
 	{ path: '/history', component: () => import('../views/History.vue') },
 	// other
 	{ path: '/about', component: () => import('../views/About.vue') },
-	{ path: '/helper', component: () => import('../views/Helper.vue') },
 	{ path: '/:pathMatch(.*)*', component: () => import('../views/PageError.vue') }
   ],
 });

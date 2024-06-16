@@ -57,6 +57,8 @@ export default {
 		}
 	},
 	mounted() {
+		this.compact = JSON.parse(sessionStorage.getItem('compact')) || false;
+
 		this.mqtt_status = this.$mqtt.status();
 
 		// subscribe to ground station topic to get state updates
@@ -87,13 +89,10 @@ export default {
 </script>
 <template>
 
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
 		Spacecraft <small>Monitor</small>
 		<small class="float-end">
-			<!-- <span class="badge rounded-0 bg-secondary">Last Update</span>
-			<span class="badge rounded-0 bg-dark" style="margin-right: 10px;">{{ dt.replace('T', ' ').replace('Z','') }} UTC</span> -->
 			<span class="badge rounded-0 bg-secondary">MQTT</span>
 			<span class="badge rounded-0" :class="{ 'bg-success': mqtt_status === 'connected', 'bg-danger': mqtt_status !== 'connected' }">{{ mqtt_status }}</span>
 			<span class="badge rounded-0 bg-secondary ms-2">D/L State</span>
@@ -102,12 +101,11 @@ export default {
 		</small>
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
-	<div class="row">
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col">
 			<h4>AOCS</h4>
-			<div class="row" v-if="renderComponent">
+			<div class="row">
 				<div class="col-xl-4 col-lg-4">
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">AOCS Chain</card-header>
@@ -173,7 +171,7 @@ export default {
 		</div>
 	</div>
 
-	<div class="row">
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col">
 			<h4>PTS</h4>
 			<div class="row" v-if="renderComponent">
@@ -252,7 +250,7 @@ export default {
 		</div>
 	</div>
 
-	<div class="row">
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col">
 			<h4>Payload</h4>
 			<div class="row" v-if="renderComponent">
@@ -278,6 +276,249 @@ export default {
 		</div>
 	</div>
 
+	<div class="row" v-if="renderComponent && compact">
+		<div class="col-sm-4">
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td colspan="2"><h5>AOCS</h5></td>
+							</tr>
+							<tr>
+								<td class="app-w-col">AOCS Chain</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_chain }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>AOCS Mode</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_mode }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>AOCS Valid</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_valid }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Rotation X</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[0].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Rotation Y</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[1].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Rotation Z</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[2].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Rate X</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[0].toFixed(3) }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Rate Y</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[1].toFixed(3) }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Rate Z</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[2].toFixed(3) }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Sun Angle</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_sun_angle.toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Nadir Angle</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_nadir_angle.toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-sm-4">
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td colspan="2"><h5>TTC</h5></td>
+							</tr>
+							<tr>
+								<td class="app-w-col">TTC Chain</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.ttc_chain }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>TTC Mode</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.ttc_mode }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>U/L Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK' || state.ttc_state_ul==='PSK_LOCK' || state.ttc_state_ul==='BIT_LOCK', 'text-bg-success': state.ttc_state_ul==='FRAME_LOCK' }">{{ state.ttc_state_ul }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>U/L SNR</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.ttc_snr_ul && state.ttc_snr_ul > -4 && state.ttc_state_ul !== 'NO_RF' ? state.ttc_snr_ul.toFixed(1) : '_' }} <small style="text-transform: none;">dBm</small></div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>TX Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-theme': state.ttc_tx_status === 'on', 'text-bg-danger': state.ttc_tx_status !== 'on' }">{{ state.ttc_tx_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Coherent</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-success': state.ttc_coherent, 'text-bg-danger': !state.ttc_coherent}">{{ state.ttc_coherent }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Ping Ack</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'bg-dark': state.ttc_ping_ack===0, 'text-bg-success': state.ttc_ping_ack>0}">{{ state.ttc_ping_ack }}</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td colspan="2"><h5>DHS</h5></td>
+							</tr>
+							<tr>
+								<td class="app-w-col">DHS Chain</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_chain }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>OBSW Mode</td>
+								<td v-if="state"><div class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_obsw_mode === 'nominal', 'bg-danger': state.dhs_obsw_mode !== 'nominal'}">{{ state.dhs_obsw_mode }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Memory Dump</td>
+								<td v-if="state"><div class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_mem_dump_enabled, 'bg-danger': !state.dhs_mem_dump_enabled }">{{ state.dhs_mem_dump_enabled ? 'Enabled' : 'Disabled' }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Memory Usage</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_memory.toFixed(2) }}%</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>TM Counter</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_tm_counter }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>TC Counter</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_tc_counter }}</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-sm-4">
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td colspan="2"><h5>PTS</h5></td>
+							</tr>
+							<tr>
+								<td class="app-w-col">PTS Chain</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_chain }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Solar Array 1</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.pts_sol_array[0] === 'nominal', 'bg-danger': state.pts_sol_array[0] !== 'nominal' }">{{ state.pts_sol_array[0] }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Solar Array 2</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.pts_sol_array[1] === 'nominal', 'bg-danger': state.pts_sol_array[1] !== 'nominal' }">{{ state.pts_sol_array[1] }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Battery DOD</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_battery_dod.toFixed(2) }}%</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Net Power</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_net_power.toFixed(2) }}%</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Temperature</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_temperature.toFixed(2) }}%</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td colspan="2"><h5>GPS Receiver</h5></td>
+							</tr>
+							<tr>
+								<td class="app-w-col">GPS Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_gps_status==='on', 'bg-danger': state.pl_gps_status!=='on' }">{{ state.pl_gps_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Latitude</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[0].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Longitude</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[1].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Altitude</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[2].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td colspan="2"><h5>Hyperspectral Camera</h5></td>
+							</tr>
+							<tr>
+								<td class="app-w-col">Camera Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+		</div>
+
+	</div>
+
 	<div class="row mt-3" v-if="renderComponent">
 		<div class="col">
 			<span class="badge rounded-0 bg-secondary">Last Update</span>
@@ -288,6 +529,8 @@ export default {
 </template>
 
 <style>
+.app-w-col { width: 70%; }
+.app-badge { font-size: 0.7rem; font-weight: 600; text-align: center; padding: 2px; }
 .app-w-100 { width: 100%; }
 .app-w-80 { width: 86px; height: 60px; }
 .app-fs-small { font-size: small; }

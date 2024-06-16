@@ -58,6 +58,8 @@ export default {
 		}
 	},
 	mounted() {
+		this.compact = JSON.parse(sessionStorage.getItem('compact')) || false;
+
 		this.mqtt_status = this.$mqtt.status();
 
 		// subscribe to ground station topic to get state updates
@@ -88,24 +90,20 @@ export default {
 </script>
 <template>
 
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
-		PTS <small>Power and Thermal</small>
+		PTS <small class="d-none d-md-inline">Power and Thermal</small>
 		<small class="float-end">
-			<!-- <span class="badge rounded-0 bg-secondary">Last Update</span>
-			<span class="badge rounded-0 bg-dark" style="margin-right: 10px;">{{ dt.replace('T', ' ').replace('Z','') }} UTC</span> -->
 			<span class="badge rounded-0 bg-secondary">MQTT</span>
 			<span class="badge rounded-0" :class="{ 'bg-success': mqtt_status === 'connected', 'bg-danger': mqtt_status !== 'connected' }">{{ mqtt_status }}</span>
-			<span class="badge rounded-0 bg-secondary ms-2">D/L State</span>
+			<span class="badge rounded-0 bg-secondary ms-1">D/L State</span>
 			<span v-if="status_dl" class="badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': status_dl==='NO_RF', 'text-bg-warning': status_dl==='PLL_LOCK' || status_dl==='PSK_LOCK' || status_dl==='BIT_LOCK', 'text-bg-success': status_dl==='FRAME_LOCK' }">{{ status_dl }}</span>
 			<span v-else class="badge rounded-0 bg-dark">_</span>
 		</small>
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
-	<div class="row" v-if="renderComponent">
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">PTS Chain</card-header>
@@ -135,7 +133,7 @@ export default {
 		</div>
 	</div>
 
-	<div class="row" v-if="renderComponent">
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">Battery DOD</card-header>
@@ -177,6 +175,49 @@ export default {
 		</div>
 	</div>
 
+	<div class="row" v-if="renderComponent && compact">
+		<div class="col-sm-4">
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td class="app-w-col">PTS Chain</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_chain }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Solar Array 1</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.pts_sol_array[0] === 'nominal', 'bg-danger': state.pts_sol_array[0] !== 'nominal' }">{{ state.pts_sol_array[0] }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Solar Array 2</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.pts_sol_array[1] === 'nominal', 'bg-danger': state.pts_sol_array[1] !== 'nominal' }">{{ state.pts_sol_array[1] }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Battery DOD</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_battery_dod.toFixed(2) }}%</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Net Power</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_net_power.toFixed(2) }}%</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Temperature</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_temperature.toFixed(2) }}%</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+		</div>
+	</div>
+
 	<div class="row mt-3" v-if="renderComponent">
 		<div class="col">
 			<span class="badge rounded-0 bg-secondary">Last Update</span>
@@ -187,6 +228,8 @@ export default {
 </template>
 
 <style>
+.app-w-col { width: 70%; }
+.app-badge { font-size: 0.7rem; font-weight: 600; text-align: center; padding: 2px; }
 .app-w-100 { width: 100%; }
 .app-w-80 { width: 86px; height: 60px; }
 .app-fs-small { font-size: small; }

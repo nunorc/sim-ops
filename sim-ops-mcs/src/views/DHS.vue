@@ -57,6 +57,8 @@ export default {
 		}
 	},
 	mounted() {
+		this.compact = JSON.parse(sessionStorage.getItem('compact')) || false;
+
 		this.mqtt_status = this.$mqtt.status();
 
 		// subscribe to ground station topic to get state updates
@@ -87,24 +89,20 @@ export default {
 </script>
 <template>
 
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
-		DHS <small>Data Handling Subsystem</small>
+		DHS <small class="d-none d-md-inline">Data Handling Subsystem</small>
 		<small class="float-end">
-			<!-- <span class="badge rounded-0 bg-secondary">Last Update</span>
-			<span class="badge rounded-0 bg-dark" style="margin-right: 10px;">{{ dt.replace('T', ' ').replace('Z','') }} UTC</span> -->
 			<span class="badge rounded-0 bg-secondary">MQTT</span>
 			<span class="badge rounded-0" :class="{ 'bg-success': mqtt_status === 'connected', 'bg-danger': mqtt_status !== 'connected' }">{{ mqtt_status }}</span>
-			<span class="badge rounded-0 bg-secondary ms-2">D/L State</span>
+			<span class="badge rounded-0 bg-secondary ms-1">D/L State</span>
 			<span v-if="status_dl" class="badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': status_dl==='NO_RF', 'text-bg-warning': status_dl==='PLL_LOCK' || status_dl==='PSK_LOCK' || status_dl==='BIT_LOCK', 'text-bg-success': status_dl==='FRAME_LOCK' }">{{ status_dl }}</span>
 			<span v-else class="badge rounded-0 bg-dark">_</span>
 		</small>
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
-	<div class="row" v-if="renderComponent">
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col-xl-6 col-lg-6">
 			<div class="row">
 					<div class="col-xl-4 col-lg-4">
@@ -198,6 +196,67 @@ export default {
 		</div>
 	</div>
 
+	<div class="row" v-if="renderComponent && compact">
+		<div class="col-sm-4">
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td class="app-w-col">DHS Chain</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_chain }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>OBSW Mode</td>
+								<td v-if="state"><div class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_obsw_mode === 'nominal', 'bg-danger': state.dhs_obsw_mode !== 'nominal'}">{{ state.dhs_obsw_mode }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Memory Dump</td>
+								<td v-if="state"><div class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_mem_dump_enabled, 'bg-danger': !state.dhs_mem_dump_enabled }">{{ state.dhs_mem_dump_enabled ? 'Enabled' : 'Disabled' }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Memory Usage</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_memory.toFixed(2) }}%</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>TM Counter</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_tm_counter }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>TC Counter</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_tc_counter }}</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+		</div>
+
+		<div class="col-sm-4">
+			<card class="mb-3">
+				<card-header>Scheduled Time Tagged Files</card-header>
+				<card-body class="mb-1">
+					<table class="table table-sm table-striped table-borderless mb-2px small text-nowrap">
+						<tbody v-if="state">
+							<tr v-if="state && state.dhs_uploaded.length > 0" v-for="row in state.dhs_uploaded">
+								<td>{{ row }}</td>
+							</tr>
+							<tr v-if="state && state.dhs_uploaded.length === 0">
+								<td>None</td>
+							</tr>
+						</tbody>
+					</table>
+				</card-body>
+			</card>
+		</div>
+	</div>
+
 	<div class="row" v-if="renderComponent">
 		<div class="col-xl-6 col-lg-6">
 			<card class="mb-3">
@@ -242,6 +301,8 @@ export default {
 </template>
 
 <style>
+.app-w-col { width: 70%; }
+.app-badge { font-size: 0.7rem; font-weight: 600; text-align: center; padding: 2px; }
 .app-w-100 { width: 100%; }
 .app-w-80 { width: 86px; height: 60px; }
 .app-fs-small { font-size: small; }

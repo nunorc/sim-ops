@@ -39,6 +39,8 @@ export default {
 		}
 	},
 	mounted() {
+		this.compact = JSON.parse(sessionStorage.getItem('compact')) || false;
+
 		this.mqtt_status = this.$mqtt.status();
 
 		// subscribe to ground station topic to get state updates
@@ -69,28 +71,21 @@ export default {
 </script>
 <template>
 
-	<div id="toasts-container" class="toasts-container" style="z-index: 10;"></div>
-
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
 		Payload
 		<small class="float-end">
-			<!-- <span class="badge rounded-0 bg-secondary">Last Update</span>
-			<span class="badge rounded-0 bg-dark" style="margin-right: 10px;">{{ dt.replace('T', ' ').replace('Z','') }} UTC</span> -->
 			<span class="badge rounded-0 bg-secondary">MQTT</span>
 			<span class="badge rounded-0" :class="{ 'bg-success': mqtt_status === 'connected', 'bg-danger': mqtt_status !== 'connected' }">{{ mqtt_status }}</span>
-			<span class="badge rounded-0 bg-secondary ms-2">D/L State</span>
+			<span class="badge rounded-0 bg-secondary ms-1">D/L State</span>
 			<span v-if="status_dl" class="badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': status_dl==='NO_RF', 'text-bg-warning': status_dl==='PLL_LOCK' || status_dl==='PSK_LOCK' || status_dl==='BIT_LOCK', 'text-bg-success': status_dl==='FRAME_LOCK' }">{{ status_dl }}</span>
 			<span v-else class="badge rounded-0 bg-dark">_</span>
 		</small>
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
-	<h4>GPS Receiver</h4>
-
-	<div class="row" v-if="renderComponent">
+	<div class="row" v-if="renderComponent && !compact">
+		<h5>GPS Receiver</h5>
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">GPS Status</card-header>
@@ -132,16 +127,58 @@ export default {
 		</div>
 	</div>
 
-	<hr class="mb-4">
-	<h4>Hyperspectral Camera</h4>
-
-	<div class="row" v-if="renderComponent">
+	<div class="row" v-if="renderComponent && !compact">
+		<h5>Hyperspectral Camera</h5>
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">Camera Status</card-header>
 				<card-body class="p-2 mx-2">
 					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</span>
 					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+	</div>
+
+	<div class="row" v-if="renderComponent && compact">
+		<div class="col-sm-4">
+			<card class="mb-3">
+				<card-body class="">
+					<table class="table text-nowrap mb-0">
+						<tbody>
+							<tr>
+								<td colspan="2"><h5>GPS Receiver</h5></td>
+							</tr>
+							<tr>
+								<td class="app-w-col">GPS Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_gps_status==='on', 'bg-danger': state.pl_gps_status!=='on' }">{{ state.pl_gps_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Latitude</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[0].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Longitude</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[1].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Altitude</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[2].toFixed(3) }}°</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td colspan="2"><h5>Hyperspectral Camera</h5></td>
+							</tr>
+							<tr>
+								<td class="app-w-col">Camera Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+						</tbody>
+					</table>
 				</card-body>
 			</card>
 		</div>
@@ -157,6 +194,8 @@ export default {
 </template>
 
 <style>
+.app-w-col { width: 70%; }
+.app-badge { font-size: 0.7rem; font-weight: 600; text-align: center; padding: 2px; }
 .app-w-100 { width: 100%; }
 .app-w-80 { width: 86px; height: 60px; }
 .app-fs-small { font-size: small; }

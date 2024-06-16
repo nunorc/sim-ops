@@ -22,7 +22,8 @@ export const useAppOptionStore = defineStore({
 		appFooterFixed: false,
 		appThemePanelToggled: false,
 		soAPI: getEnv('SO_API', '/api'),
-		soAuth: false
+		soAuth: false,
+		soCompact: false
 	}
   }
 });
