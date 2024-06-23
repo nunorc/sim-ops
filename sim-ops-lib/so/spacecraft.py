@@ -54,6 +54,9 @@ class SpacecraftState:
     pl_gps_status: Status = Status.off
     pl_gps_pos: list[Status] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     pl_camera_status: Status = Status.off
+    pl_camera_config: str = 'VNIR'
+    pl_sdr_status: Status = Status.off
+    pl_sdr_config: str = 'IoT'
 
     # book-keeping
     gs_carrier_ul = Status.off
@@ -532,6 +535,14 @@ class SpacecraftSim:
             if self.state.dhs_obsw_mode == Status.nominal:
                 if data['value'] in ['on', 'off']:
                     self._set_state([('pl_camera_status', Status[data['value']] )])
+                return _ok
+            else:
+                return _fail
+
+        if data['control'] == 'pl_sdr_status':
+            if self.state.dhs_obsw_mode == Status.nominal:
+                if data['value'] in ['on', 'off']:
+                    self._set_state([('pl_sdr_status', Status[data['value']] )])
                 return _ok
             else:
                 return _fail

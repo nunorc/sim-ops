@@ -128,13 +128,49 @@ export default {
 	</div>
 
 	<div class="row" v-if="renderComponent && !compact">
-		<h5>Hyperspectral Camera</h5>
+		<div class="col-xl-4 col-lg-4">
+			<h5>Camera</h5>
+		</div>
+		<div class="col-xl-4 col-lg-4">
+			<h5>SDR</h5>
+		</div>
+	</div>
+
+	<div class="row" v-if="renderComponent && !compact">
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">Camera Status</card-header>
 				<card-body class="p-2 mx-2">
 					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</span>
 					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">Camera Config</card-header>
+				<card-body class="p-2 mx-2">
+					<h3 v-if="state" class="mb-0 text-center">{{ state.pl_camera_config }}</h3>
+					<h3 v-else>_</h3>
+				</card-body>
+			</card>
+		</div>
+
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">SDR Status</card-header>
+				<card-body class="p-2 mx-2">
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_sdr_status==='on', 'bg-danger': state.pl_sdr_status!=='on' }">{{ state.pl_sdr_status }}</span>
+					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">SDR Config</card-header>
+				<card-body class="p-2 mx-2">
+					<h3 v-if="state" class="mb-0 text-center">{{ state.pl_sdr_config }}</h3>
+					<h3 v-else>_</h3>
 				</card-body>
 			</card>
 		</div>
@@ -170,11 +206,29 @@ export default {
 								<td v-else>_</td>
 							</tr>
 							<tr>
-								<td colspan="2"><h5>Hyperspectral Camera</h5></td>
+								<td colspan="2"><h5>Camera</h5></td>
 							</tr>
 							<tr>
-								<td class="app-w-col">Camera Status</td>
+								<td>Camera Status</td>
 								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>Camera Config</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_camera_config }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td colspan="2"><h5>SDR</h5></td>
+							</tr>
+							<tr>
+								<td>SDR Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_sdr_status==='on', 'bg-danger': state.pl_sdr_status!=='on' }">{{ state.pl_sdr_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>SDR Freq</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_sdr_config }}</div></td>
 								<td v-else>_</td>
 							</tr>
 						</tbody>
