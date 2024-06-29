@@ -272,6 +272,15 @@ export default {
 						</card-body>
 					</card>
 				</div>
+				<div class="col-xl-2 col-lg-2">
+					<card class="mb-3">
+						<card-header class="card-header fw-bold small text-center p-1">SDR Status</card-header>
+						<card-body class="p-2 mx-2">
+							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_sdr_status==='on', 'bg-danger': state.pl_sdr_status!=='on' }">{{ state.pl_sdr_status }}</span>
+							<span v-else>_</span>
+						</card-body>
+					</card>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -481,34 +490,21 @@ export default {
 					<table class="table text-nowrap mb-0">
 						<tbody>
 							<tr>
-								<td colspan="2"><h5>GPS Receiver</h5></td>
+								<td colspan="2"><h5>Payload</h5></td>
 							</tr>
 							<tr>
-								<td class="app-w-col">GPS Status</td>
+								<td class="app-w-col">GPS Receiver Status</td>
 								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_gps_status==='on', 'bg-danger': state.pl_gps_status!=='on' }">{{ state.pl_gps_status }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
-								<td>Latitude</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[0].toFixed(3) }}°</div></td>
-								<td v-else>_</td>
-							</tr>
-							<tr>
-								<td>Longitude</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[1].toFixed(3) }}°</div></td>
-								<td v-else>_</td>
-							</tr>
-							<tr>
-								<td>Altitude</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_gps_pos[2].toFixed(3) }}°</div></td>
-								<td v-else>_</td>
-							</tr>
-							<tr>
-								<td colspan="2"><h5>Hyperspectral Camera</h5></td>
-							</tr>
-							<tr>
 								<td class="app-w-col">Camera Status</td>
 								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td class="app-w-col">SDR Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_sdr_status==='on', 'bg-danger': state.pl_sdr_status!=='on' }">{{ state.pl_sdr_status }}</div></td>
 								<td v-else>_</td>
 							</tr>
 						</tbody>

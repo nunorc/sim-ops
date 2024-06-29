@@ -227,7 +227,7 @@ export default {
 								<td v-else>_</td>
 							</tr>
 							<tr>
-								<td>SDR Freq</td>
+								<td>SDR Config</td>
 								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pl_sdr_config }}</div></td>
 								<td v-else>_</td>
 							</tr>
