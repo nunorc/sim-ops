@@ -49,10 +49,12 @@ export default {
 				{ 'sub': 'DHS', 'desc': 'Enable memory downlink dump', 'tc': 'TC_DHS_021', 'tm': 'DHS > Memory Dump' },
 				{ 'sub': 'DHS', 'desc': 'Disable memory downlink dump', 'tc': 'TC_DHS_022', 'tm': 'DHS > Memory Dump' },
 
-				{ 'sub': 'Payload', 'desc': 'Turn GPS receiver ON', 'tc': 'TC_PL_001', 'tm': 'Payload > GPS Status' },
-				{ 'sub': 'Payload', 'desc': 'Turn GPS receiver OFF', 'tc': 'TC_PL_002', 'tm': 'Payload > GPS Status' },
-				{ 'sub': 'Payload', 'desc': 'Turn hyperspectral camera ON', 'tc': 'TC_PL_011', 'tm': 'Payload > Hyperspectral Camera Status' },
-				{ 'sub': 'Payload', 'desc': 'Turn hyperspectral camera OFF', 'tc': 'TC_PL_012', 'tm': 'Payload > Hyperspectral Camera Status' }
+				{ 'sub': 'Payload', 'desc': 'Power on GPS receiver', 'tc': 'TC_PL_001', 'tm': 'Payload > GPS Status' },
+				{ 'sub': 'Payload', 'desc': 'Power off GPS receiver', 'tc': 'TC_PL_002', 'tm': 'Payload > GPS Status' },
+				{ 'sub': 'Payload', 'desc': 'Power on camera', 'tc': 'TC_PL_011', 'tm': 'Payload > Camera Status' },
+				{ 'sub': 'Payload', 'desc': 'Power off camera', 'tc': 'TC_PL_012', 'tm': 'Payload > Camera Status' },
+				{ 'sub': 'Payload', 'desc': 'Power on SDR', 'tc': 'TC_PL_021', 'tm': 'Payload > SDR Status' },
+				{ 'sub': 'Payload', 'desc': 'Power off SDR', 'tc': 'TC_PL_022', 'tm': 'Payload > SDR Status' }
 			]
 		}
 	},

@@ -6,17 +6,6 @@ import 'jsvectormap/dist/maps/world.js';
 import 'jsvectormap/dist/css/jsvectormap.min.css';
 import axios from 'axios';
 
-/*
-	establish uplink
-	establish downlink
-	enable tracking
-	change TTC mode
-	download data
-	recover safemode
-	Switch on GPS
-	switch on Camera
-*/
-
 const appVariable = useAppVariableStore();
 
 export default {
@@ -85,28 +74,37 @@ export default {
 		let switchOnGPS = [
 			{ 'num' : '1', 'con': 'Uplink not yet established', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
 			{ 'num' : '2', 'con': 'Downlink not yet established', 'action': 'establish Downlink', 'tc': '<a href="#EstablishDownlink">Establish Downlink</a>'},
-			{ 'num' : '3', 'con': '', 'action': 'switch on GPS', 'tc': 'TC_PL_001'}
+			{ 'num' : '3', 'con': '', 'action': 'Power on GPS receiver', 'tc': 'TC_PL_001'}
 		];
 		let switchOffGPS = [
 			{ 'num' : '1', 'con': 'Uplink not yet established', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
 			{ 'num' : '2', 'con': 'Downlink not yet established', 'action': 'establish Downlink', 'tc': '<a href="#EstablishDownlink">Establish Downlink</a>'},
-			{ 'num' : '3', 'con': '', 'action': 'switch off GPS', 'tc': 'TC_PL_002'}
+			{ 'num' : '3', 'con': '', 'action': 'Power off GPS receiver', 'tc': 'TC_PL_002'}
 		];
 		let switchOnCamera = [
 			{ 'num' : '1', 'con': '', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
 			{ 'num' : '2', 'con': '', 'action': 'establish Downlink', 'tc': '<a href="#EstablishDownlink">Establish Downlink</a>'},
-			{ 'num' : '3', 'con': '', 'action': 'set AOCS mode to nadir pointing', 'tc': 'TC_AOCS_002'},
-			{ 'num' : '4', 'con': '', 'action': 'switch on camera', 'tc': 'TC_PL_011'}
+			{ 'num' : '3', 'con': '', 'action': 'Power on camera', 'tc': 'TC_PL_011'}
 		];
 		let switchOffCamera = [
 			{ 'num' : '1', 'con': 'Uplink not yet established', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
 			{ 'num' : '2', 'con': 'Downlink not yet established', 'action': 'establish Downlink', 'tc': '<a href="#EstablishDownlink">Establish Downlink</a>'},
-			{ 'num' : '3', 'con': '', 'action': 'switch off camera', 'tc': 'TC_PL_012'}
+			{ 'num' : '3', 'con': '', 'action': 'Power off camera', 'tc': 'TC_PL_012'}
+		];
+		let switchOnSDR = [
+			{ 'num' : '1', 'con': '', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
+			{ 'num' : '2', 'con': '', 'action': 'establish Downlink', 'tc': '<a href="#EstablishDownlink">Establish Downlink</a>'},
+			{ 'num' : '3', 'con': '', 'action': 'Power on SDR', 'tc': 'TC_PL_021'}
+		];
+		let switchOffSDR = [
+			{ 'num' : '1', 'con': 'Uplink not yet established', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
+			{ 'num' : '2', 'con': 'Downlink not yet established', 'action': 'establish Downlink', 'tc': '<a href="#EstablishDownlink">Establish Downlink</a>'},
+			{ 'num' : '3', 'con': '', 'action': 'Power off SDR', 'tc': 'TC_PL_022'}
 		];
 		return {
 			renderComponent: true,
-			procedures: [establishUplink, establishDownlink, enableRanging, enableDoppler, changeTtcMode, downloadData, recoverSafeMode, switchOnGPS, switchOffGPS, switchOnCamera, switchOffCamera],
-			procedurenames: ["Establish Uplink", "Establish Downlink", "Enable Ranging", "Enable Doppler", "Change TTC Mode", "Download OBC Data", "Recover from Safemode", "Switch on GPS", "Switch off GPS", "Switch on Camera", "Switch off Camera"]
+			procedures: [establishUplink, establishDownlink, enableRanging, enableDoppler, changeTtcMode, downloadData, recoverSafeMode, switchOnGPS, switchOffGPS, switchOnCamera, switchOffCamera, switchOnSDR, switchOffSDR],
+			procedurenames: ["Establish Uplink", "Establish Downlink", "Enable Ranging", "Enable Doppler", "Change TTC Mode", "Download OBC Data", "Recover from Safemode", "Power on GPS Receiver", "Power off GPS Receiver", "Power on Camera", "Power off Camera", "Power on SDR", "Power off SDR"]
 		}
 	},
 	methods: {

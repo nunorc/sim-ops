@@ -348,12 +348,12 @@ export default {
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">Payload</h6>
-							<button @click="addStack('TC_PL_001', 'pl_gps_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power GPS On">TC_PL_001</button>
-							<button @click="addStack('TC_PL_002', 'pl_gps_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power GPS Off">TC_PL_002</button>
-							<button @click="addStack('TC_PL_011', 'pl_camera_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power Camera On">TC_PL_011</button>
-							<button @click="addStack('TC_PL_012', 'pl_camera_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-1 mt-2" title="Power Camera Off">TC_PL_012</button>
-							<button @click="addStack('TC_PL_021', 'pl_sdr_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power SDR On">TC_PL_021</button>
-							<button @click="addStack('TC_PL_022', 'pl_sdr_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-1 mt-2" title="Power SDR Off">TC_PL_022</button>
+							<button @click="addStack('TC_PL_001', 'pl_gps_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power On GPS Receiver">TC_PL_001</button>
+							<button @click="addStack('TC_PL_002', 'pl_gps_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power Off GPS Receiver">TC_PL_002</button>
+							<button @click="addStack('TC_PL_011', 'pl_camera_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power On Camera">TC_PL_011</button>
+							<button @click="addStack('TC_PL_012', 'pl_camera_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-1 mt-2" title="Power Off Camera">TC_PL_012</button>
+							<button @click="addStack('TC_PL_021', 'pl_sdr_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power On SDR">TC_PL_021</button>
+							<button @click="addStack('TC_PL_022', 'pl_sdr_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-1 mt-2" title="Power Off SDR">TC_PL_022</button>
 						</div>
 					</div>
 				</card-body>
