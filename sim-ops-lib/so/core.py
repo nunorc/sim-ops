@@ -55,7 +55,7 @@ class Scenario:
     begin: str = ''
     end: str = ''
     tle: str = ''
-    time_step: int = 5
+    time_step: int = 1
     running: bool = False
     ground_station: GroundStation = None
     gs_initial_state: Any = None

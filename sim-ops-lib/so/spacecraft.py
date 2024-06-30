@@ -54,9 +54,9 @@ class SpacecraftState:
     pl_gps_status: Status = Status.off
     pl_gps_pos: list[Status] = field(default_factory=lambda: [0.0, 0.0, 0.0])
     pl_camera_status: Status = Status.off
-    pl_camera_config: str = 'VNIR'
+    pl_camera_config: str = 'LE'
     pl_sdr_status: Status = Status.off
-    pl_sdr_config: str = 'IoT'
+    pl_sdr_config: str = 'BCN'
 
     # book-keeping
     gs_carrier_ul = Status.off
@@ -335,9 +335,9 @@ class SpacecraftSim:
         if _state.dhs_mem_dump_enabled is True:
             _mod = 0.1
             if _state.ttc_mode == TTCModes.XLBR:
-                _mod = 0.2
+                _mod = 1.1
             if _state.ttc_mode == TTCModes.XHBR:
-                _mod = 0.4
+                _mod = 1.8
         _mod -= 0.0001 # memory fills with basic TM 
         if _state.pl_camera_status == Status.on:
             _mod -= 0.001 # memory fills with Camera data

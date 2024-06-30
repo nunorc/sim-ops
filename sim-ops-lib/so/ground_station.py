@@ -30,7 +30,7 @@ class GroundStationState:
     sweep_done: bool = False
     data_proxy: str = 'ESOC-1'
     mode: TTCModes = TTCModes.SHBR
-    power_ul: float = 30.0
+    power_ul: float = 50.0
     position: list[float] = field(default_factory=list)
 
     # book-keeping
