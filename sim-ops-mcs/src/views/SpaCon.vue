@@ -307,44 +307,44 @@ export default {
 					<div class="row mt-1" v-if="renderComponent">
 						<div class="col">
 							<h6 class="mt-2 mb-0">AOCS</h6>
-							<button @click="addStack('TC_AOCS_001', 'aocs_mode', 'SUN', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="AOCS Mode SUN">TC_AOCS_001</button>
-							<button @click="addStack('TC_AOCS_002', 'aocs_mode', 'NADIR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="AOCS Mode NADIR">TC_AOCS_002</button>
-							<button @click="addStack('TC_AOCS_011', 'aocs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="AOCS Chain A">TC_AOCS_011</button>
-							<button @click="addStack('TC_AOCS_012', 'aocs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="AOCS Chain B">TC_AOCS_012</button>
+							<button @click="addStack('TC_AOCS_001', 'aocs_mode', 'SUN', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set AOCS Mode SUN">TC_AOCS_001</button>
+							<button @click="addStack('TC_AOCS_002', 'aocs_mode', 'NADIR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set AOCS Mode NADIR">TC_AOCS_002</button>
+							<button @click="addStack('TC_AOCS_011', 'aocs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set AOCS Chain A">TC_AOCS_011</button>
+							<button @click="addStack('TC_AOCS_012', 'aocs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set AOCS Chain B">TC_AOCS_012</button>
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">TTC</h6>
-							<button @click="addStack('TC_TTC_001', 'ttc_mode', 'SLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC SLBR">TC_TTC_001</button>
-							<button @click="addStack('TC_TTC_002', 'ttc_mode', 'SHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC SHBR">TC_TTC_002</button>
-							<button @click="addStack('TC_TTC_003', 'ttc_mode', 'XLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC XLBR">TC_TTC_003</button>
-							<button @click="addStack('TC_TTC_004', 'ttc_mode', 'XHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC XHBR">TC_TTC_004</button>
-							<button @click="addStack('TC_TTC_011', 'ttc_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC Chain A">TC_TTC_011</button>
-							<button @click="addStack('TC_TTC_012', 'ttc_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="TTC Chain B">TC_TTC_012</button>
+							<button @click="addStack('TC_TTC_001', 'ttc_mode', 'SLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode SLBR">TC_TTC_001</button>
+							<button @click="addStack('TC_TTC_002', 'ttc_mode', 'SHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode SHBR">TC_TTC_002</button>
+							<button @click="addStack('TC_TTC_003', 'ttc_mode', 'XLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode XLBR">TC_TTC_003</button>
+							<button @click="addStack('TC_TTC_004', 'ttc_mode', 'XHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode XHBR">TC_TTC_004</button>
+							<button @click="addStack('TC_TTC_011', 'ttc_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Chain A">TC_TTC_011</button>
+							<button @click="addStack('TC_TTC_012', 'ttc_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Chain B">TC_TTC_012</button>
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">TTC</h6>
-							<button @click="addStack('TC_TTC_021', 'ttc_ping_ack', '', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Ping">TC_TTC_021</button>
-							<button @click="addStack('TC_TTC_022', 'ttc_coherent', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set Coherent">TC_TTC_022</button>
-							<button @click="addStack('TC_TTC_031', 'ttc_tx_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Transmitter ON">TC_TTC_031</button>
-							<button @click="addStack('TC_TTC_032', 'ttc_tx_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Transmitter OFF">TC_TTC_032</button>
+							<button @click="addStack('TC_TTC_021', 'ttc_ping_ack', '', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Ping Spacecraft">TC_TTC_021</button>
+							<button @click="addStack('TC_TTC_022', 'ttc_coherent', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set Coherent Transponder">TC_TTC_022</button>
+							<button @click="addStack('TC_TTC_031', 'ttc_tx_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power Transmitter ON">TC_TTC_031</button>
+							<button @click="addStack('TC_TTC_032', 'ttc_tx_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power Transmitter OFF">TC_TTC_032</button>
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">PTS</h6>
-							<button @click="addStack('TC_PTS_001', 'pts_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="PTS Chain A">TC_PTS_001</button>
-							<button @click="addStack('TC_PTS_002', 'pts_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="PTS Chain B">TC_PTS_002</button>
-							<button @click="addStack('TC_PTS_011', 'pts_sol_array__0', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Array 1">TC_PTS_011</button>
-							<button @click="addStack('TC_PTS_012', 'pts_sol_array__0', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Array 1">TC_PTS_012</button>
-							<button @click="addStack('TC_PTS_021', 'pts_sol_array__1', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Array 2">TC_PTS_021</button>
-							<button @click="addStack('TC_PTS_022', 'pts_sol_array__1', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Array 2">TC_PTS_022</button>
+							<button @click="addStack('TC_PTS_001', 'pts_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set PTS Chain A">TC_PTS_001</button>
+							<button @click="addStack('TC_PTS_002', 'pts_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set PTS Chain B">TC_PTS_002</button>
+							<button @click="addStack('TC_PTS_011', 'pts_sol_array__0', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Solar Array 1">TC_PTS_011</button>
+							<button @click="addStack('TC_PTS_012', 'pts_sol_array__0', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Solar Array 1">TC_PTS_012</button>
+							<button @click="addStack('TC_PTS_021', 'pts_sol_array__1', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Solar Array 2">TC_PTS_021</button>
+							<button @click="addStack('TC_PTS_022', 'pts_sol_array__1', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Solar Array 2">TC_PTS_022</button>
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">DHS</h6>
-							<button @click="addStack('TC_DHS_001', 'dhs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="DHS Chain A">TC_DHS_001</button>
-							<button @click="addStack('TC_DHS_002', 'dhs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="DHS Chain B">TC_DHS_002</button>
-							<button @click="addStack('TC_DHS_011', 'dhs_obsw_mode', 'safe', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Safe Mode">TC_DHS_011</button>
-							<button @click="addStack('TC_DHS_012', 'dhs_obsw_mode', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Nominal Mode">TC_DHS_012</button>
-							<button @click="addStack('TC_DHS_021', 'dhs_mem_dump_enabled', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Start Memory Dump">TC_DHS_021</button>
-							<button @click="addStack('TC_DHS_022', 'dhs_mem_dump_enabled', false, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Stop Memory Dump">TC_DHS_022</button>
+							<button @click="addStack('TC_DHS_001', 'dhs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set DHS Chain A">TC_DHS_001</button>
+							<button @click="addStack('TC_DHS_002', 'dhs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set DHS Chain B">TC_DHS_002</button>
+							<button @click="addStack('TC_DHS_011', 'dhs_obsw_mode', 'safe', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set OBSW to Safe Mode">TC_DHS_011</button>
+							<button @click="addStack('TC_DHS_012', 'dhs_obsw_mode', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set OBSW to Nominal Mode">TC_DHS_012</button>
+							<button @click="addStack('TC_DHS_021', 'dhs_mem_dump_enabled', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Memory Dump">TC_DHS_021</button>
+							<button @click="addStack('TC_DHS_022', 'dhs_mem_dump_enabled', false, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Memory Dump">TC_DHS_022</button>
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">Payload</h6>
@@ -361,9 +361,9 @@ export default {
 		</div>
 		<div class="col-xl-4 col-lg-4">
 			<card class="mb-3">
-				<card-header class="card-header fw-bold small text-center p-1">CFDP Command Files Upload</card-header>
+				<card-header class="card-header fw-bold small text-center p-1">CFDP Files Uplink Service</card-header>
 				<card-body class="text-center">
-					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal1()">Attitude Control</button>
+					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal1()">Command Sequence</button>
 					<span>&nbsp;&nbsp;</span>
 					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal2()">Orbit Control</button>
 					<span>&nbsp;&nbsp;</span>
