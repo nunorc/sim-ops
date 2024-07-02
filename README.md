@@ -69,7 +69,7 @@ Running Python lib tests:
 
 ### The Sim-Ops Team
 
-Nuno Carvalho, Peter Stöferle, Adrian Calleja, Vladimir Zelenevskiy, Rodrigo Laurinovics, Marcin Kovalevskij, Tim Oerther, Frederik Dall'Omo and David Evans.
+Nuno Carvalho, Peter Stöferle, Adrian Calleja, Vladimir Zelenevskiy, Rodrigo Laurinovics, Marcin Kovalevskij, Tim Oerther, Frederik Dall'Omo, Guilhem Honore and David Evans.
 
 ### Acknowledgements
 
