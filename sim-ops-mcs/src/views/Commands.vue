@@ -23,6 +23,7 @@ export default {
 				// { 'sub': 'AOCS', 'desc': 'Set AOCS mode MONITORING', 'tc': 'TC_AOCS_005', 'tm': 'AOCS > AOCS Mode' },
 				{ 'sub': 'AOCS', 'desc': 'Set AOCS chain A', 'tc': 'TC_AOCS_011', 'tm': 'AOCS > AOCS Chain' },
 				{ 'sub': 'AOCS', 'desc': 'Set AOCS chain B', 'tc': 'TC_AOCS_012', 'tm': 'AOCS > AOCS Chain' },
+				{ 'sub': 'AOCS', 'desc': 'Calibrate AOCS sensors', 'tc': 'TC_AOCS_021', 'tm': 'AOCS > AOCS Valid' },
 
 				{ 'sub': 'TTC', 'desc': 'Set TTC mode SLBR', 'tc': 'TC_TTC_001', 'tm': 'TTC > TTC Mode' },
 				{ 'sub': 'TTC', 'desc': 'Set TTC mode SHBR', 'tc': 'TC_TTC_002', 'tm': 'TTC > TTC Mode' },

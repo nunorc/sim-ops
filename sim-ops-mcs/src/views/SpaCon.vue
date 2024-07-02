@@ -311,6 +311,7 @@ export default {
 							<button @click="addStack('TC_AOCS_002', 'aocs_mode', 'NADIR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set AOCS Mode NADIR">TC_AOCS_002</button>
 							<button @click="addStack('TC_AOCS_011', 'aocs_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set AOCS Chain A">TC_AOCS_011</button>
 							<button @click="addStack('TC_AOCS_012', 'aocs_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set AOCS Chain B">TC_AOCS_012</button>
+							<button @click="addStack('TC_AOCS_021', 'aocs_valid', 'valid', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Calibrate AOCS sensors">TC_AOCS_021</button>
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">TTC</h6>

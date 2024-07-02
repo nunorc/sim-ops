@@ -134,7 +134,7 @@ def control_loop():
             # need at least ground station U/L carrier enabled to send command
             if _admin is False and (GS_SIM is None or GS_SIM.state.carrier_ul is None or GS_SIM.state.carrier_ul == Status.off):
                 result = { 'status': 'r:REL r:ACC r:FAIL'}
-                _ts = -1
+                _ts = GS_SIM.state.ts
             elif GS_SIM.state.power_ul < 50:
                 result = { 'status': 'g:REL r:ACC r:FAIL'}
                 _ts = GS_SIM.state.ts

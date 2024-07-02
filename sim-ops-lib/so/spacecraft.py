@@ -295,7 +295,7 @@ class SpacecraftSim:
         if _state.pts_sol_array[1] == Status.nominal:
             _power += 5 * int(_state.is_sunlit)
         if _state.pl_gps_status == Status.on:
-            _power -= 3
+            _power -= 0.5
         if _state.pl_camera_status == Status.on:
             _power -= 4
         if _state.ttc_tx_status == Status.on:
@@ -445,6 +445,12 @@ class SpacecraftSim:
         if data['control'] == 'aocs_chain':
             if data['value'] in ['A', 'B']:
                 self._set_state([('aocs_chain', data['value'])])
+                return _ok
+            else:
+                return _fail
+        if data['control'] == 'aocs_valid':
+            if data['value'] in ['valid', 'not_valid', 'unknown']:
+                self._set_state([('aocs_valid', data['value'])])
                 return _ok
             else:
                 return _fail

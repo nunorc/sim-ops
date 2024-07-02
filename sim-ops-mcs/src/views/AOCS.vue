@@ -158,7 +158,7 @@ export default {
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">AOCS Valid</card-header>
 				<card-body class="p-2 mx-2">
-					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.aocs_valid }}</span>
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': state.aocs_valid==='not_valid', 'text-bg-dark': state.aocs_valid==='unkown', 'text-bg-theme': state.aocs_valid==='valid' }">{{ state.aocs_valid }}</span>
 					<span v-else>_</span>
 				</card-body>
 			</card>
