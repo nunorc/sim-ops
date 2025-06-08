@@ -2,12 +2,14 @@ services:
   so-mqtt:
     image: eclipse-mosquitto:latest
     container_name: so-mqtt
+    restart: unless-stopped
     volumes:
       - ./containers/mqtt/config:/mosquitto/config
     ports:
       - "8083:8083"
   so-api:
     container_name: so-api
+    restart: unless-stopped
     build:
       context: .
       dockerfile: ./containers/Dockerfile_so-api
@@ -19,8 +21,19 @@ services:
       - "8000:8000"
     environment:
       - SO_MCS_ADMIN_PASSWORD=${SO_MCS_ADMIN_PASSWORD}
+  so-minio:
+    container_name: so-minio
+    restart: unless-stopped
+    image: docker.io/bitnami/minio
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      - MINIO_ROOT_USER=myusername
+      - MINIO_ROOT_PASSWORD=mypassword
   so-master:
     container_name: so-master
+    restart: unless-stopped
     build:
       context: .
       dockerfile: ./containers/Dockerfile_so-master
@@ -32,6 +45,7 @@ services:
       - so-mqtt
   so-mcs:
     container_name: so-mcs
+    restart: unless-stopped
     build:
       context: .
       dockerfile: ./containers/Dockerfile_so-mcs
@@ -44,6 +58,7 @@ services:
       - SO_MQTT=${SO_MQTT}
       - SO_MQTT_PORT=${SO_MQTT_PORT}
       - SO_MQTT_PATH=${SO_MQTT_PATH}
+      - SO_MQTT_SSL=${SO_MQTT_SSL}
       - SO_MCS_USERNAME=${SO_MCS_USERNAME}
       - SO_MCS_PASSWORD=${SO_MCS_PASSWORD}
       - SO_MCS_ADMIN_PASSWORD=${SO_MCS_ADMIN_PASSWORD}

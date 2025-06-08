@@ -20,6 +20,9 @@ fi
 if [[ ! -z "${SO_MQTT_PATH}" ]]; then
   JSON_STRING="${JSON_STRING} 'SO_MQTT_PATH': '${SO_MQTT_PATH}',"
 fi
+if [[ ! -z "${SO_MQTT_SSL}" ]]; then
+  JSON_STRING="${JSON_STRING} 'SO_MQTT_SSL': '${SO_MQTT_SSL}',"
+fi
 if [[ ! -z "${SO_MCS_SIMPLE}" ]]; then
   JSON_STRING="${JSON_STRING} 'SO_MCS_SIMPLE': parseInt('${SO_MCS_SIMPLE}'),"
 else

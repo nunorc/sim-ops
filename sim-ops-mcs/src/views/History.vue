@@ -3,9 +3,6 @@ import { useAppVariableStore } from '@/stores/app-variable';
 import { useAppOptionStore } from '@/stores/app-option';
 import apexchart from '@/components/plugins/Apexcharts.vue';
 import chartjs from '@/components/plugins/Chartjs.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
 import axios from 'axios';
 
 const appVariable = useAppVariableStore(),
@@ -44,16 +41,11 @@ export default {
 }
 </script>
 <template>
-
-	<div id="toasts-container" class="toasts-container" style="z-index: 10;"></div>
-
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
 		History <small>TC & Control</small>
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
 	<card v-for="h in hist" class="mb-4" v-if="renderComponent">
 		<card-header>{{ (new Date(h[0]*1000)).toString().split("+")[0] }}</card-header>

@@ -499,7 +499,7 @@ $app-header-scroll-box-shadow:                  null !default;
 
 // 18. App - Sidebar settings
       
-$app-sidebar-width:                             rem(270px) !default;
+$app-sidebar-width:                             rem(200px) !default;
 $app-sidebar-menu-header-color:                 rgba(var(--#{$prefix}inverse-rgb), .3) !default;
 $app-sidebar-menu-link-color:                   rgba(var(--#{$prefix}inverse-rgb), .5) !default;
 $app-sidebar-menu-link-hover-color:             $black !default;

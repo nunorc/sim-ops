@@ -3,10 +3,6 @@ import { useAppVariableStore } from '@/stores/app-variable';
 import { useAppOptionStore } from '@/stores/app-option';
 import apexchart from '@/components/plugins/Apexcharts.vue';
 import chartjs from '@/components/plugins/Chartjs.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
-import axios from 'axios';
 
 const appVariable = useAppVariableStore(),
       appOption = useAppOptionStore();
@@ -29,7 +25,8 @@ export default {
 				options: { chart: { type: 'line', sparkline: { enabled: true } }, colors: [appVariable.color.theme], stroke: { curve: 'straight', width: 2 }, tooltip: { enabled: false }, yaxis: { } },
 				series: [{ name: 'SNR', data: [] }]
 			},
-			mqtt_status: "checking"
+			mqtt_status: "checking",
+			compact: false
 		}
 	},
 	methods: {
@@ -62,7 +59,7 @@ export default {
 						dt_str = dt.replace('T', ' ').replace('Z','') + ' UTC';
 					document.getElementById("dt-now").innerHTML = dt_str;
 
-					if (data.status_dl === 'FRAME_LOCK') {
+					if (data.ov_no_tm !== true && data.status_dl === 'FRAME_LOCK') {
 						this.updateData(data);
 						const el = document.getElementById("dt-last-up");
 						if (el)
@@ -106,7 +103,16 @@ export default {
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">U/L Status</card-header>
 				<card-body class="p-2 mx-2">
-					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK' || state.ttc_state_ul==='PSK_LOCK' || state.ttc_state_ul==='BIT_LOCK', 'text-bg-success': state.ttc_state_ul==='FRAME_LOCK' }">{{ state.ttc_state_ul }}</span>
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK', 'text-bg-success': state.ttc_state_ul==='BIT_LOCK' }">{{ state.ttc_state_ul }}</span>
+					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">OBC Status</card-header>
+				<card-body class="p-2 mx-2">
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.ttc_obc === 'nominal', 'bg-danger': state.ttc_obc !== 'nominal' }">{{ state.ttc_obc }}</span>
 					<span v-else>_</span>
 				</card-body>
 			</card>
@@ -124,18 +130,18 @@ export default {
 		</div>
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
-				<card-header class="card-header fw-bold small text-center p-1">Coherent</card-header>
+				<card-header class="card-header fw-bold small text-center p-1">Ranging</card-header>
 				<card-body class="p-2 mx-2">
-					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-success': state.ttc_coherent, 'text-bg-danger': !state.ttc_coherent}">{{ state.ttc_coherent }}</span>
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': state.ttc_ranging === 'disabled', 'text-bg-success': state.ttc_ranging === 'enabled' }">{{ state.ttc_ranging }}</span>
 					<span v-else>_</span>
 				</card-body>
 			</card>
 		</div>
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
-				<card-header class="card-header fw-bold small text-center p-1">Ping Ack</card-header>
+				<card-header class="card-header fw-bold small text-center p-1">Coherent</card-header>
 				<card-body class="p-2 mx-2">
-					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-dark': state.ttc_ping_ack===0, 'text-bg-success': state.ttc_ping_ack>0}">{{ state.ttc_ping_ack }}</span>
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': state.ttc_coherent === 'disabled', 'text-bg-success': state.ttc_coherent === 'enabled' }">{{ state.ttc_coherent }}</span>
 					<span v-else>_</span>
 				</card-body>
 			</card>
@@ -165,6 +171,37 @@ export default {
 				</card-body>
 			</card>
 		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">Ping Ack</card-header>
+				<card-body class="p-2 mx-2">
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-dark': state.ttc_ping_ack===0, 'text-bg-success': state.ttc_ping_ack>0}">{{ state.ttc_ping_ack }}</span>
+					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">TTC Sb Antenna</card-header>
+				<card-body class="p-2 mx-2">
+					<h5 class="mb-0 text-center">
+						<span v-if="state">{{ state.ttc_s_antenna }}</span>
+						<span v-else>_</span>
+					</h5>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">TTC Xb Antenna</card-header>
+				<card-body class="p-2 mx-2">
+					<h5 class="mb-0 text-center">
+						<span v-if="state">{{ state.ttc_x_antenna }}</span>
+						<span v-else>_</span>
+					</h5>
+				</card-body>
+			</card>
+		</div>
 	</div>
 
 	<div class="row" v-if="renderComponent && compact">
@@ -185,7 +222,12 @@ export default {
 							</tr>
 							<tr>
 								<td>U/L Status</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK' || state.ttc_state_ul==='PSK_LOCK' || state.ttc_state_ul==='BIT_LOCK', 'text-bg-success': state.ttc_state_ul==='FRAME_LOCK' }">{{ state.ttc_state_ul }}</div></td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK', 'text-bg-success': state.ttc_state_ul==='BIT_LOCK' }">{{ state.ttc_state_ul }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>OBC Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'bg-success': state.ttc_obc === 'nominal', 'bg-danger': state.ttc_obc !== 'nominal' }">{{ state.ttc_obc }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
@@ -199,8 +241,13 @@ export default {
 								<td v-else>_</td>
 							</tr>
 							<tr>
+								<td>Ranging</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': state.ttc_ranging === 'disabled', 'text-bg-success': state.ttc_ranging === 'enabled'}">{{ state.ttc_ranging }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
 								<td>Coherent</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-success': state.ttc_coherent, 'text-bg-danger': !state.ttc_coherent}">{{ state.ttc_coherent }}</div></td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': state.ttc_coherent === 'disabled', 'text-bg-success': state.ttc_coherent === 'enabled'}">{{ state.ttc_coherent }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>

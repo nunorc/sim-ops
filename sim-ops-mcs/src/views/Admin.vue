@@ -3,9 +3,6 @@ import { useAppVariableStore } from '@/stores/app-variable';
 import { useAppOptionStore } from '@/stores/app-option';
 import apexchart from '@/components/plugins/Apexcharts.vue';
 import chartjs from '@/components/plugins/Chartjs.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
 import axios from 'axios';
 
 const appVariable = useAppVariableStore(),
@@ -25,7 +22,7 @@ export default {
 			scenarios: [],
 			data: null,
 			ov_control: 'max_status_dl',
-			ov_value: '',
+			ov_value: "NO_RF",
 			admin_pw: '',
 			overrides: [
 				{ name: "Max D/L Status", value: 'max_status_dl' },
@@ -34,16 +31,39 @@ export default {
 				{ name: "Ground station U/L Carrier", value: 'carrier_ul' },
 				{ name: "No TM", value: 'no_tm' },
 				{ name: "No TC", value: 'no_tc' },
-				{ name: "No Uploads", value: 'no_uploads' }
+				{ name: "No Uploads", value: 'no_uploads' },
+				{ name: "Frame Quality", value: 'frame_quality' }
 			],
+			param: "",
+			params: [
+				{ name: "AOCS Mode", value: "aocs_mode" },
+				{ name: "AOCS Valid", value: "aocs_valid" },
+				{ name: "TTC Mode", value: "ttc_mode" },
+				{ name: "TTC Sb Antenna", value: "ttc_s_antenna" },
+				{ name: "TTC Xb Antenna", value: "ttc_x_antenna" },
+				{ name: "TTC OBC", value: "ttc_obc" },
+				{ name: "DHS OBSW Mode", value: "dhs_obsw_mode" }
+
+			],
+			param_value: "SLBR",
+			params_options: {
+				"aocs_mode": [ "SUN", "NADIR" ],
+				"aocs_valid": [ "unkown", "valid" ],
+				"ttc_mode": [ "SLBR", "SHBR", "XLBR", "XHBR" ],
+				"ttc_s_antenna": [ "LGA_RHC", "LGA_LHC" ],
+				"ttc_x_antenna": [ "MGA", "HGA" ],
+				"ttc_obc": [ "nominal", "error" ],
+				"dhs_obsw_mode": [ "nominal", "safe" ]
+			},
 			options: {
-				'max_status_dl': ["NO_RF", "PLL_LOCK", "PSK_LOCK", "BIT_LOCK", "FRAME_LOCK"],
+				'max_status_dl': [ "NO_RF", "PLL_LOCK", "PSK_LOCK", "BIT_LOCK", "FRAME_LOCK" ],
 				'max_snr_dl': [],
 				'tx_status': ["on", "off"],
 				'carrier_ul': ["on", "off"],
 				'no_tm': ['enabled'],
 				'no_tc': ['enabled'],
-				'no_uploads': ['enabled']
+				'no_uploads': ['enabled'],
+				'frame_quality': ['good', 'bad', 'unknown']
 			},
 			current: [],
 			ts: -1,
@@ -81,6 +101,8 @@ export default {
 						this.current = resp.data.overrides;
 
 						this.renderComponent = true;
+
+						sessionStorage.setItem('admin_pw', this.admin_pw);
 					}
 					else {
 						this.renderComponent = false;
@@ -118,13 +140,37 @@ export default {
 		sendCommand(command, control, value, event) {
 			let button = event.target;
 
+			if (value.length === 0) {
+				alert("Empy parameter value, not sending.");
+				return;
+			}
+
 			button.disabled = true;
 			this.control_send = `${control} ${value}`;
 			this.control_recv = '';
 			this.control_recv_loading = true;
 
-			let body = { 'system': 'spacecraft',  'control': control, 'value': value, 'command': null };
+			let body = { 'system': 'spacecraft', 'control': control, 'value': value, 'command': null, admin: true };
 			axios.post(`${appOption.soAPI}/control?${new URLSearchParams({admin_pw:this.admin_pw})}`, body)
+				.then((resp) => {
+					if (resp.status===200) {
+						this.control_recv = resp.data.status;
+						button.disabled = false;
+						this.control_recv_loading = false;
+					}
+					else {
+						this.renderComponent = false;
+					}
+				})
+		},
+		triggerCustom(command, control, value, event) {
+			let button = event.target;
+			button.disabled = true;
+			this.control_send = `${control} ${value}`;
+			this.control_recv = '';
+			this.control_recv_loading = true;
+
+			axios.get(`${appOption.soAPI}/admin/trigger/${control}?${new URLSearchParams({admin_pw:this.admin_pw})}`)
 				.then((resp) => {
 					if (resp.status===200) {
 						this.control_recv = resp.data.status;
@@ -159,20 +205,22 @@ export default {
 					}
 				})
 		}
+	},
+	mounted() {
+		this.admin_pw = sessionStorage.getItem('admin_pw') || '';
+
+		if (this.admin_pw) {
+			this.adminStatus();
+		}
 	}
 }
 </script>
 <template>
-
-	<div id="toasts-container" class="toasts-container" style="z-index: 10;"></div>
-
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
 		Admin
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
 	<div class="row" v-if="!renderComponent">
 		<div class="col">
@@ -231,7 +279,7 @@ export default {
 					<div class="row">
 						<div class="col-6 form-group">
 							<label class="form-label">Control</label>
-							<select class="form-control form-select" v-model="ov_control">
+							<select class="form-control form-select" v-model="ov_control" :disabled="!running">
 								<option v-for="ov in overrides" :value="ov.value">{{ ov.name }}</option>
 							</select>
 						</div>
@@ -240,10 +288,10 @@ export default {
 							<select v-if="options[ov_control].length > 0" class="form-control form-select" v-model="ov_value" :disabled="!running">
 								<option v-for="opt in options[ov_control]" :value="opt">{{ opt }}</option>
 							</select>
-							<input v-if="options[ov_control].length === 0" type="text" class="form-control" v-model="ov_value" placeholder="">
+							<input v-if="options[ov_control].length === 0" type="text" class="form-control" v-model="ov_value" placeholder="" :disabled="!running">
 						</div>
 						<div class="col-3 d-flex justify-content-center align-items-center">
-							<button @click="adminSet(ov_control, ov_value, $event)" type="button" class="btn btn-outline-theme">Set</button>
+							<button @click="adminSet(ov_control, ov_value, $event)" type="button" class="btn btn-outline-theme" :disabled="!running">Set Over.</button>
 						</div>
 					</div>
 				</card-body>
@@ -274,13 +322,41 @@ export default {
 	<div class="row" v-if="renderComponent">
 		<div class="col-xl-6 col-lg-6">
 			<card class="mb-3">
-				<card-header class="card-header fw-bold small text-center p-1">Actions</card-header>
-				<card-body class="text-center">
-					<button @click="sendCommand(null, 'safe_mode', true, $event)" type="button" class="btn btn-sm btn-outline-theme app-w-80" :disabled="!running">Trigger Safe Mode</button>
+				<card-header class="card-header fw-bold small text-center p-1">Set Status</card-header>
+				<card-body class="p-3 mx-2">
+					<div class="row">
+						<div class="col-6 form-group">
+							<label class="form-label">Param</label>
+							<select class="form-control form-select" v-model="param" :disabled="!running">
+								<option v-for="p in params" :value="p.value">{{ p.name }}</option>
+							</select>
+						</div>
+						<div class="col-3 form-group">
+							<label class="form-label">Value</label>
+							<select  class="form-control form-select" v-model="param_value" :disabled="!running">
+								<option value=""></option>
+								<option v-for="opt in params_options[param]" :value="opt">{{ opt }}</option>
+							</select>
+						</div>
+						<div class="col-3 d-flex justify-content-center align-items-center">
+							<button @click="sendCommand(null, param, param_value, $event)" type="button" class="btn btn-outline-theme" :disabled="!running">Set Param</button>
+						</div>
+					</div>
 				</card-body>
 			</card>
 		</div>
 		<div class="col-xl-6 col-lg-6">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">Actions</card-header>
+				<card-body class="text-center">
+					<button @click="triggerCustom(null, 'custom-1', true, $event)" type="button" class="btn btn-sm btn-outline-theme app-w-80 m-1" :disabled="!running">Trigger Custom 1</button>
+					<button @click="triggerCustom(null, 'custom-2', true, $event)" type="button" class="btn btn-sm btn-outline-theme app-w-80 m-1" :disabled="!running">Trigger Custom 2</button>
+					<button @click="sendCommand(null, 'trigger_safe_mode', true, $event)" type="button" class="btn btn-sm btn-outline-theme app-w-80 m-1" :disabled="!running">Trigger Safe Mode</button>
+					<button @click="sendCommand(null, 'trigger_ttc_obc_error', true, $event)" type="button" class="btn btn-sm btn-outline-theme app-w-80 m-1" :disabled="!running">TTC OBC Error</button>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-12 col-lg-12">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">Scenario Details</card-header>
 				<card-body>

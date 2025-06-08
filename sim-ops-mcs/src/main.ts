@@ -1,9 +1,9 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { Vue3ProgressPlugin } from '@marcoschulte/vue3-progress';
-import PerfectScrollbar from 'vue3-perfect-scrollbar';
+import { PerfectScrollbarPlugin } from 'vue3-perfect-scrollbar';
 import mitt from 'mitt';
-import 'vue3-perfect-scrollbar/dist/vue3-perfect-scrollbar.css';
+import 'vue3-perfect-scrollbar/style.css';
 import '@marcoschulte/vue3-progress/dist/index.css';
 import '@fortawesome/fontawesome-free/scss/fontawesome.scss';
 import '@fortawesome/fontawesome-free/scss/regular.scss';
@@ -43,7 +43,7 @@ app.component('CardExpandToggler', CardExpandToggler);
 app.use(createPinia());
 app.use(router);
 app.use(Vue3ProgressPlugin);
-app.use(PerfectScrollbar);
+app.use(PerfectScrollbarPlugin);
 
 app.use(createPahoMqttPlugin({
       PluginOptions: {
@@ -52,9 +52,10 @@ app.use(createPahoMqttPlugin({
       },
       MqttOptions: {
         host: getEnv('SO_MQTT', window.location.hostname),
-        port: parseInt(getEnv('SO_MQTT_PORT', window.location.port)),
+        port: parseInt(getEnv('SO_MQTT_PORT', location.port)),
         mainTopic: getEnv('SQ_MQTT_PATH', '/mqtt'),
-        clientId: `MyID-${Math.random() * 9999}`
+        clientId: `MyID-${Math.random() * 9999}`,
+        useSSL: ("true" === getEnv('SO_MQTT_SSL', "false"))
       },
     }));
 app.config.globalProperties.emitter = emitter;

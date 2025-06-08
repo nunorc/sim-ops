@@ -3,10 +3,6 @@ import { useAppVariableStore } from '@/stores/app-variable';
 import { useAppOptionStore } from '@/stores/app-option';
 import apexchart from '@/components/plugins/Apexcharts.vue';
 import chartjs from '@/components/plugins/Chartjs.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
-import axios from 'axios';
 
 const appVariable = useAppVariableStore(),
       appOption = useAppOptionStore();
@@ -49,8 +45,8 @@ export default {
 			this.ts = this.state.ts;
 			this.dt = new Date(this.state.ts*1000).toISOString();
 
-			this.chartBattery.series[0].data.push(this.state.pts_battery_dod.toFixed(2));
-			this.chartTemperature.series[0].data.push(this.state.pts_temperature.toFixed(2));
+			this.chartBattery.series[0].data.push(this.state.eps_battery_dod.toFixed(2));
+			this.chartTemperature.series[0].data.push(this.state.eps_temperature.toFixed(2));
             this.chartMemory.series[0].data.push(this.state.dhs_memory.toFixed(2));
 
 			this.mqtt_status = this.$mqtt.status();
@@ -72,7 +68,7 @@ export default {
 						dt_str = dt.replace('T', ' ').replace('Z','') + ' UTC';
 					document.getElementById("dt-now").innerHTML = dt_str;
 
-					if (data.status_dl === 'FRAME_LOCK') {
+					if (data.ov_no_tm !== true && data.status_dl === 'FRAME_LOCK') {
 						this.updateData(data);
 						const el = document.getElementById("dt-last-up");
 						if (el)
@@ -110,7 +106,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">AOCS Chain</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.aocs_chain }}</span>
+							<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.aocs_chain }}</span>
 							<span v-else>_</span>
 						</card-body>
 					</card>
@@ -119,7 +115,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">AOCS Mode</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.aocs_mode }}</span>
+							<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.aocs_mode }}</span>
 							<span v-else>_</span>
 						</card-body>
 					</card>
@@ -128,7 +124,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">AOCS valid</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.aocs_valid }}</span>
+							<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.aocs_valid }}</span>
 							<span v-else>_</span>
 						</card-body>
 					</card>
@@ -151,8 +147,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">U/L Status</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK' || state.ttc_state_ul==='PSK_LOCK' || state.ttc_state_ul==='BIT_LOCK', 'text-bg-success': state.ttc_state_ul==='FRAME_LOCK' }">{{ state.ttc_state_ul }}</span>
-							<span v-else>_</span>
+							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK', 'text-bg-success': state.ttc_state_ul==='BIT_LOCK' }">{{ state.ttc_state_ul }}</span>
 						</card-body>
 					</card>
 				</div>
@@ -173,13 +168,13 @@ export default {
 
 	<div class="row" v-if="renderComponent && !compact">
 		<div class="col">
-			<h4>PTS</h4>
+			<h4>EPS</h4>
 			<div class="row" v-if="renderComponent">
 				<div class="col-xl-4 col-lg-4">
 					<card class="mb-3">
-						<card-header class="card-header fw-bold small text-center p-1">PTS Chain</card-header>
+						<card-header class="card-header fw-bold small text-center p-1">EPS Chain</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_chain }}</span>
+							<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.eps_chain }}</span>
 							<span v-else>_</span>
 						</card-body>
 					</card>
@@ -188,8 +183,8 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">Battery DOD</card-header>
 						<card-body>
-							<div class="row align-items-center" v-if="state">
-								<h3 class="mb-0 text-center">{{ state.pts_battery_dod.toFixed(2) }}%</h3>
+							<div class="row align-items-center" v-if="state && state.ttc_obc === 'nominal'">
+								<h3 class="mb-0 text-center">{{ state.eps_battery_dod.toFixed(2) }}%</h3>
 								<div class="mt-1">
 									<apexchart :height="chartBattery.height" :options="chartBattery.options" :series="chartBattery.series"></apexchart>
 								</div>
@@ -201,8 +196,8 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">Temperature</card-header>
 						<card-body>
-							<div class="row align-items-center" v-if="state">
-								<h3 class="mb-0 text-center">{{ state.pts_temperature.toFixed(2) }}°C</h3>
+							<div class="row align-items-center" v-if="state && state.ttc_obc === 'nominal'">
+								<h3 class="mb-0 text-center">{{ state.eps_temperature.toFixed(2) }}°C</h3>
 								<div class="mt-1">
 									<apexchart :height="chartTemperature.height" :options="chartTemperature.options" :series="chartTemperature.series"></apexchart>
 								</div>
@@ -219,7 +214,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">DHS Chain</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_chain }}</span>
+							<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_chain }}</span>
 							<span v-else>_</span>
 						</card-body>
 					</card>
@@ -228,7 +223,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">OBSW Mode</card-header>
 							<card-body class="p-2 mx-2">
-								<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_obsw_mode === 'nominal', 'bg-danger': state.dhs_obsw_mode !== 'nominal'}">{{ state.dhs_obsw_mode }}</span>
+								<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_obsw_mode === 'nominal', 'bg-danger': state.dhs_obsw_mode !== 'nominal'}">{{ state.dhs_obsw_mode }}</span>
 								<span v-else>_</span>
 							</card-body>
 					</card>
@@ -237,7 +232,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">Memory Usage</card-header>
 						<card-body>
-							<div class="row align-items-center" v-if="state">
+							<div class="row align-items-center" v-if="state && state.ttc_obc === 'nominal'">
 								<h3 class="mb-0 text-center">{{ state.dhs_memory.toFixed(2) }}%</h3>
 								<div class="mt-1">
 									<apexchart :height="chartMemory.height" :options="chartMemory.options" :series="chartMemory.series"></apexchart>
@@ -258,7 +253,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">GPS Status</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_gps_status==='on', 'bg-danger': state.pl_gps_status!=='on' }">{{ state.pl_gps_status }}</span>
+							<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_gps_status==='on', 'bg-danger': state.pl_gps_status!=='on' }">{{ state.pl_gps_status }}</span>
 							<span v-else>_</span>
 						</card-body>
 					</card>
@@ -267,7 +262,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">Camera Status</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</span>
+							<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</span>
 							<span v-else>_</span>
 						</card-body>
 					</card>
@@ -276,7 +271,7 @@ export default {
 					<card class="mb-3">
 						<card-header class="card-header fw-bold small text-center p-1">SDR Status</card-header>
 						<card-body class="p-2 mx-2">
-							<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_sdr_status==='on', 'bg-danger': state.pl_sdr_status!=='on' }">{{ state.pl_sdr_status }}</span>
+							<span v-if="state && state.ttc_obc === 'nominal'" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_sdr_status==='on', 'bg-danger': state.pl_sdr_status!=='on' }">{{ state.pl_sdr_status }}</span>
 							<span v-else>_</span>
 						</card-body>
 					</card>
@@ -296,57 +291,57 @@ export default {
 							</tr>
 							<tr>
 								<td class="app-w-col">AOCS Chain</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_chain }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_chain }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>AOCS Mode</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_mode }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_mode }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>AOCS Valid</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_valid }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_valid }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Rotation X</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[0].toFixed(3) }}°</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[0].toFixed(3) }}°</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Rotation Y</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[1].toFixed(3) }}°</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[1].toFixed(3) }}°</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Rotation Z</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[2].toFixed(3) }}°</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rotation[2].toFixed(3) }}°</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Rate X</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[0].toFixed(3) }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[0].toFixed(3) }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Rate Y</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[1].toFixed(3) }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[1].toFixed(3) }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Rate Z</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[2].toFixed(3) }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_rates[2].toFixed(3) }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Sun Angle</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_sun_angle.toFixed(3) }}°</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_sun_angle.toFixed(3) }}°</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Nadir Angle</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_nadir_angle.toFixed(3) }}°</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 text-uppercase bg-dark">{{ state.aocs_nadir_angle.toFixed(3) }}°</div></td>
 								<td v-else>_</td>
 							</tr>
 						</tbody>
@@ -374,7 +369,12 @@ export default {
 							</tr>
 							<tr>
 								<td>U/L Status</td>
-								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK' || state.ttc_state_ul==='PSK_LOCK' || state.ttc_state_ul==='BIT_LOCK', 'text-bg-success': state.ttc_state_ul==='FRAME_LOCK' }">{{ state.ttc_state_ul }}</div></td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'text-bg-danger': state.ttc_state_ul==='NO_RF', 'text-bg-warning': state.ttc_state_ul==='PLL_LOCK', 'text-bg-success': state.ttc_state_ul==='BIT_LOCK' }">{{ state.ttc_state_ul }}</div></td>
+								<td v-else>_</td>
+							</tr>
+							<tr>
+								<td>OBC Status</td>
+								<td v-if="state"><div class="app-badge rounded-0 text-uppercase" :class="{ 'bg-success': state.ttc_obc === 'nominal', 'bg-danger': state.ttc_obc !== 'nominal' }">{{ state.ttc_obc }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
@@ -410,32 +410,32 @@ export default {
 							</tr>
 							<tr>
 								<td class="app-w-col">DHS Chain</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_chain }}</div></td>
+								<td v-if="state  && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.eps_chain }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>OBSW Mode</td>
-								<td v-if="state"><div class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_obsw_mode === 'nominal', 'bg-danger': state.dhs_obsw_mode !== 'nominal'}">{{ state.dhs_obsw_mode }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_obsw_mode === 'nominal', 'bg-danger': state.dhs_obsw_mode !== 'nominal'}">{{ state.dhs_obsw_mode }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Memory Dump</td>
-								<td v-if="state"><div class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_mem_dump_enabled, 'bg-danger': !state.dhs_mem_dump_enabled }">{{ state.dhs_mem_dump_enabled ? 'Enabled' : 'Disabled' }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.dhs_mem_dump_enabled, 'bg-danger': !state.dhs_mem_dump_enabled }">{{ state.dhs_mem_dump_enabled ? 'Enabled' : 'Disabled' }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Memory Usage</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_memory.toFixed(2) }}%</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_memory.toFixed(2) }}%</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>TM Counter</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_tm_counter }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_tm_counter }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>TC Counter</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_tc_counter }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.dhs_tc_counter }}</div></td>
 								<td v-else>_</td>
 							</tr>
 						</tbody>
@@ -449,36 +449,36 @@ export default {
 					<table class="table text-nowrap mb-0">
 						<tbody>
 							<tr>
-								<td colspan="2"><h5>PTS</h5></td>
+								<td colspan="2"><h5>EPS</h5></td>
 							</tr>
 							<tr>
-								<td class="app-w-col">PTS Chain</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_chain }}</div></td>
+								<td class="app-w-col">EPS Chain</td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.eps_chain }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Solar Array 1</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.pts_sol_array[0] === 'nominal', 'bg-danger': state.pts_sol_array[0] !== 'nominal' }">{{ state.pts_sol_array[0] }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.eps_sol_array[0] === 'nominal', 'bg-danger': state.eps_sol_array[0] !== 'nominal' }">{{ state.eps_sol_array[0] }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Solar Array 2</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.pts_sol_array[1] === 'nominal', 'bg-danger': state.pts_sol_array[1] !== 'nominal' }">{{ state.pts_sol_array[1] }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-success': state.eps_sol_array[1] === 'nominal', 'bg-danger': state.eps_sol_array[1] !== 'nominal' }">{{ state.eps_sol_array[1] }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Battery DOD</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_battery_dod.toFixed(2) }}%</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.eps_battery_dod.toFixed(2) }}%</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Net Power</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_net_power.toFixed(2) }}%</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.eps_net_power.toFixed(2) }}%</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td>Temperature</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.pts_temperature.toFixed(2) }}%</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase bg-dark">{{ state.eps_temperature.toFixed(2) }}%</div></td>
 								<td v-else>_</td>
 							</tr>
 						</tbody>
@@ -494,17 +494,17 @@ export default {
 							</tr>
 							<tr>
 								<td class="app-w-col">GPS Receiver Status</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_gps_status==='on', 'bg-danger': state.pl_gps_status!=='on' }">{{ state.pl_gps_status }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_gps_status==='on', 'bg-danger': state.pl_gps_status!=='on' }">{{ state.pl_gps_status }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td class="app-w-col">Camera Status</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_camera_status==='on', 'bg-danger': state.pl_camera_status!=='on' }">{{ state.pl_camera_status }}</div></td>
 								<td v-else>_</td>
 							</tr>
 							<tr>
 								<td class="app-w-col">SDR Status</td>
-								<td v-if="state"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_sdr_status==='on', 'bg-danger': state.pl_sdr_status!=='on' }">{{ state.pl_sdr_status }}</div></td>
+								<td v-if="state && state.ttc_obc === 'nominal'"><div class="app-badge rounded-0 app-w-100 text-uppercase" :class="{ 'bg-theme': state.pl_sdr_status==='on', 'bg-danger': state.pl_sdr_status!=='on' }">{{ state.pl_sdr_status }}</div></td>
 								<td v-else>_</td>
 							</tr>
 						</tbody>

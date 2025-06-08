@@ -7,7 +7,7 @@ const router = createRouter({
 	// telemetry
 	{ path: '/aocs', component: () => import('../views/AOCS.vue') },
 	{ path: '/ttc', component: () => import('../views/TTC.vue') },
-	{ path: '/pts', component: () => import('../views/PTS.vue') },
+	{ path: '/eps', component: () => import('../views/EPS.vue') },
 	{ path: '/dhs', component: () => import('../views/DHS.vue') },
 	{ path: '/payload', component: () => import('../views/Payload.vue') },
 	// monitoring
@@ -20,6 +20,9 @@ const router = createRouter({
 	{ path: '/commands', component: () => import('../views/Commands.vue') },
 	{ path: '/procedures', component: () => import('../views/Procedures.vue') },
 	{ path: '/gs_config', component: () => import('../views/GSConfig.vue') },
+	// products
+	{ path: '/flight-dynamics', component: () => import('../views/FlightDynamics.vue') },
+	{ path: '/packet-store', component: () => import('../views/PacketStore.vue') },
 	// admin
 	{ path: '/admin', component: () => import('../views/Admin.vue') },
 	{ path: '/history', component: () => import('../views/History.vue') },

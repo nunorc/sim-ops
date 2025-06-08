@@ -43,6 +43,10 @@ A Python (version 3.11 recommended) needs to be available, the list of required 
 
 **Note** A MQTT service, e.g. [Eclipse Mosquitto](https://mosquitto.org/) to run the scripts from a command line, check `containers/mqtt/config/mosquitto.conf` for an example configuration
 
+**Note** A [MINIO](https://min.io/) instance is required for storing products objects, to run one using docker:
+
+    $ docker run -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=username" -e "MINIO_ROOT_PASSWORD=password" quay.io/minio/minio server /data --console-address ":9001"
+
 Once an MQTT is running and reachable and all the requirements installed, run:
 
     # setup environment variables (required for all scripts and npm)

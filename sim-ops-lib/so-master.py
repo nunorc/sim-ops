@@ -2,9 +2,9 @@
 import os, threading, time, json, logging, zmq, copy, glob
 from datetime import datetime
 
-from so.core import load_scenario, Backend, OverrideState, Status
+from so.core import load_scenario, Backend, OverrideState, Status, ObjectStore, TTCState, Products, Quality
 from so.ground_station import GroundStationSim
-from so.spacecraft import SpacecraftSim
+from so.spacecraft import SpacecraftSim, SpacePacketHandler
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +13,17 @@ SCENARIO, GS_SIM, SC_SIM, BACKEND, END_SIM = None, None, None, None, None
 LAST_GS_STATE, LAST_SC_STATE = None, None
 CONTROL_HIST = []
 OV_STATE = OverrideState()
+SIM_UID = None
+
+SO_GEN_PRODUCTS = bool(int(os.getenv('SO_GEN_PRODUCTS', 1)))
+if SO_GEN_PRODUCTS:
+    OBJ_STORE = ObjectStore()
+    SPH = SpacePacketHandler()
+    PRODUCTS = Products(object_store=OBJ_STORE)
+else:
+    OBJ_STORE = None
+    SPH = None
+    PRODUCTS = None
 
 def sim_loop():
     logger.info('Starting sim loop')
@@ -29,17 +40,34 @@ def sim_loop():
         sc_state = SC_SIM.ping(ts, gs_state=gs_state, ov_state=OV_STATE)
         if sc_state:
             BACKEND.publish('spacecraft', sc_state.to_dict())
+            # handle packet store
+            if SO_GEN_PRODUCTS:
+                # FIXME handle high priority tm edge case
+                c1 = sc_state.status_dl == TTCState['FRAME_LOCK'] and sc_state.frame_quality == Quality.good and sc_state.frame_checks == Status.enabled and sc_state.ov_no_tm is not True
+                c2 = sc_state.status_dl == TTCState['FRAME_LOCK'] and sc_state.frame_quality == Quality.good and sc_state.frame_checks == Status.disabled
+                c3 = sc_state.status_dl == TTCState['FRAME_LOCK'] and sc_state.frame_quality != Quality.good and gs_state.frame_checks == Status.disabled
+                if c1 or c2 or c3:
+                    # store packet every 5s
+                    if int(ts) % 5 == 0:
+                        # scrub packet data if only high priority is available
+                        if sc_state.ttc_obc == Status.error:
+                            OBJ_STORE.store(SIM_UID+'-tm', str(int(ts)), SPH.space_packet(sc_state.scrub()).as_bytes())
+                        else:
+                            OBJ_STORE.store(SIM_UID+'-tm', str(int(ts)), SPH.space_packet(sc_state).as_bytes())
 
         end = time.time()
         delta = SCENARIO.time_step - (end - start)
 
         ts += delta
+        if delta <= 0:
+            delta = 1
+
         time.sleep(delta)
 
 def start_sim(uid):
     logger.info(f"Starting sim { uid }")
 
-    global SCENARIO, GS_SIM, SC_SIM, BACKEND, END_SIM, LAST_GS_STATE, LAST_SC_STATE
+    global SCENARIO, GS_SIM, SC_SIM, BACKEND, END_SIM, LAST_GS_STATE, LAST_SC_STATE, SIM_UID
     END_SIM = threading.Event()
 
     SCENARIO = load_scenario(uid)
@@ -47,13 +75,20 @@ def start_sim(uid):
     SC_SIM = SpacecraftSim(SCENARIO, initial_state=LAST_SC_STATE)
     BACKEND = Backend(SCENARIO)
 
+    SIM_UID = 'sim-' + datetime.utcnow().isoformat(sep='T', timespec='minutes').replace('-','.').replace(':','h').replace('T', '-')
+    logger.info(f"Sim UID set to: { SIM_UID }")
+
+    if SO_GEN_PRODUCTS:
+        logger.info('Products handling: flight dynamics start sim')
+        PRODUCTS.fd_start_sim()
+
     t = threading.Thread(target=sim_loop)
     t.start()
 
 def stop_sim():
     logger.info(f"Stopping sim")
 
-    global END_SIM, GS_SIM, SC_SIM, LAST_GS_STATE, LAST_SC_STATE, CONTROL_HIST
+    global END_SIM, GS_SIM, SC_SIM, LAST_GS_STATE, LAST_SC_STATE, CONTROL_HIST, SIM_UID
     if END_SIM == None or SCENARIO == None or GS_SIM == None or SC_SIM == None:
         logger.info("No sim running")
         return
@@ -63,6 +98,10 @@ def stop_sim():
     LAST_GS_STATE = copy.deepcopy(GS_SIM.state) if GS_SIM else None
     LAST_SC_STATE = copy.deepcopy(SC_SIM.state) if SC_SIM else None
 
+    if SO_GEN_PRODUCTS:
+        logger.info('Products handling: flight dynamics stop sim')
+        PRODUCTS.fd_stop_sim(SIM_UID, LAST_GS_STATE)
+
     # save control history to file and reset
     _path, _now = os.path.join('data', 'hist'), int(datetime.utcnow().timestamp())
     if not os.path.exists(_path):
@@ -70,6 +109,8 @@ def stop_sim():
     with open(os.path.join(_path, f"{ str(_now) }.json"), 'w') as fout:
         json.dump(CONTROL_HIST, fout)
     CONTROL_HIST = []
+
+    SIM_UID = None
 
 def _log_control(data, result, ts):
     global CONTROL_HIST
@@ -124,21 +165,24 @@ def control_loop():
 
         _ok, _fail = { 'status': 'OK' }, { 'status': 'FAIL'}
         _admin = False
-        if 'admin' in data:
-            _admin = data['admin']
+        if 'admin' in data and data['admin'] is True:
+            _admin = True
+        else:
+            _admin = False
 
         # handle spacecraft controls
-        if 'system' in data and data['system'] == 'spacecraft':
+        if 'system' in data and data['system'] == 'spacecraft' and _admin is False:
             _fail = { 'status': 'r:REL r:ACC r:FAIL'}
 
-            # need at least ground station U/L carrier enabled to send command
-            if _admin is False and (GS_SIM is None or GS_SIM.state.carrier_ul is None or GS_SIM.state.carrier_ul == Status.off):
+            # need at least ground station U/L carrier enabled and sweep done to send commands
+            if GS_SIM is None or GS_SIM.state.carrier_ul is None or GS_SIM.state.carrier_ul == Status.off or GS_SIM.state.sweep_done is False:
                 result = { 'status': 'r:REL r:ACC r:FAIL'}
                 _ts = GS_SIM.state.ts
             elif GS_SIM.state.power_ul < 50:
                 result = { 'status': 'g:REL r:ACC r:FAIL'}
                 _ts = GS_SIM.state.ts
             else:
+                print('try', data)
                 try:
                     if OV_STATE.no_tc is not True:
                         result = SC_SIM.control(data, ov_state=OV_STATE, admin=_admin)
@@ -183,6 +227,14 @@ def control_loop():
                     result = _get_history()
                 case other:
                     result = _fail
+
+        # handle admin control for spacecraft, without overrides and requiring TC
+        elif 'system' in data and data['system'] == 'spacecraft' and _admin is True:
+            result = SC_SIM.control(data, admin=_admin)
+            if 'OK' in result['status']:
+                result = _ok
+            else:
+                result = _fail
 
         # handle overrides
         elif 'system' in data and data['system'] == 'override':

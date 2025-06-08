@@ -1,10 +1,5 @@
 <script>
 import { useAppVariableStore } from '@/stores/app-variable';
-import apexchart from '@/components/plugins/Apexcharts.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
-import axios from 'axios';
 
 const appVariable = useAppVariableStore();
 
@@ -24,6 +19,9 @@ export default {
 				{ 'desc': 'Disable Ranging', 'res': 'Ground Station > Ranging' },
 				{ 'desc': 'Enable Doppler', 'res': 'Ground Station > Doppler' },
 				{ 'desc': 'Disable Doppler', 'res': 'Ground Station > Doppler' },
+				{ 'desc': 'Sweep', 'res': 'Ground Station > Sweep Done' },
+				{ 'desc': 'Enable Fr. Checks', 'res': 'Ground Station > Frame Checks' },
+				{ 'desc': 'Disable Fr. Checks', 'res': 'Ground Station > Frame Checks' },
 				{ 'desc': 'Set U/L Power level: 30, 40, 50', 'res': 'Ground Station > U/L Power' },
 				{ 'desc': 'Set configuration mode: SLBR, SHBR, XLBR, XHBR', 'res': 'Ground Station > mode' },
 			]

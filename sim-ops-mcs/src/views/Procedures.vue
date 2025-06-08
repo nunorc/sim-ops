@@ -1,10 +1,5 @@
 <script>
 import { useAppVariableStore } from '@/stores/app-variable';
-import apexchart from '@/components/plugins/Apexcharts.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
-import axios from 'axios';
 
 const appVariable = useAppVariableStore();
 
@@ -46,30 +41,7 @@ export default {
 		let downloadData = [
 			{ 'num' : '1', 'con': 'Uplink not yet established', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
 			{ 'num' : '2', 'con': 'Downlink not yet established', 'action': 'establish Downlink', 'tc': '<a href="#EstablishDownlink">Establish Downlink</a>'},
-			{ 'num' : '3', 'con': '', 'action': 'set AOCS to Nadir Pointing', 'tc': 'TC_AOCS_002'},
-			{ 'num' : '4', 'con': 'SNR Margin above 3dB', 'action': 'change TTC Mode to XLBR', 'tc': 'TC_TTC_003'},
-			{ 'num' : '5', 'con': '', 'action': 'change GS Mode to XLBR', 'tc': 'OM > Mode'},
-			{ 'num' : '6', 'con': '', 'action': 'start download', 'tc': 'TC_DHS_021'},
-			{ 'num' : '7', 'con': 'SNR Margin above 3dB', 'action': 'change TTC Mode to XHBR', 'tc': 'TC_TTC_004'},
-			{ 'num' : '8', 'con': '', 'action': 'change GS Mode to XHBR', 'tc': 'OM > Mode'},
-			{ 'num' : '9', 'con': '', 'action': 'restart download', 'tc': 'TC_DHS_021'},
-			{ 'num' : '10', 'con': 'Frame Lock lost', 'action': 'change TTC Mode to XLBR', 'tc': 'TC_TTC_003'},
-			{ 'num' : '11', 'con': '', 'action': 'restart download', 'tc': 'TC_DHS_021'},
-			{ 'num' : '12', 'con': '', 'action': 'change GS Mode to XLBR', 'tc': 'OM > Mode'},
-			{ 'num' : '13', 'con': 'Frame Lock lost', 'action': 'change TTC Mode to SHBR', 'tc': 'TC_TTC_002'},
-			{ 'num' : '14', 'con': '', 'action': 'change GS Mode to SHBR', 'tc': 'OM > Mode'}
-		];
-		let recoverSafeMode = [
-			{ 'num' : '1', 'con': '', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
-			{ 'num' : '2', 'con': '', 'action': 'change TTC Mode to SLBR on G/S', 'tc': 'OM > Mode'},
-			{ 'num' : '3', 'con': '', 'action': 'enable on-board Transmitter', 'tc': 'TC_TTC_031'},
-			{ 'num' : '4', 'con': '', 'action': 'confirm safemode', 'tc': 'DHS > OBSW Mode'},
-			{ 'num' : '5', 'con': '', 'action': 'set OBSW mode to nominal', 'tc': 'TC_DHS_012'},
-			{ 'num' : '6', 'con': '', 'action': 'set AOCS Chain to A', 'tc': 'TC_AOCS_011'},
-			{ 'num' : '7', 'con': '', 'action': 'set TTC Chain to A', 'tc': 'TC_TTC_011'},
-			{ 'num' : '8', 'con': '', 'action': 'set PTS Chain to A', 'tc': 'TC_PTS_001'},
-			{ 'num' : '9', 'con': '', 'action': 'set DHS Chain to A', 'tc': 'TC_DHS_001'},
-			{ 'num' : '10', 'con': '', 'action': 'set TTC Mode to SHBR', 'tc': 'TC_TTC_002'}
+			{ 'num' : '3', 'con': '', 'action': 'start memory dump', 'tc': 'TC_DHS_021'}
 		];
 		let switchOnGPS = [
 			{ 'num' : '1', 'con': 'Uplink not yet established', 'action': 'establish Uplink', 'tc': '<a href="#EstablishUplink">Establish Uplink</a>'},
@@ -103,8 +75,8 @@ export default {
 		];
 		return {
 			renderComponent: true,
-			procedures: [establishUplink, establishDownlink, enableRanging, enableDoppler, changeTtcMode, downloadData, recoverSafeMode, switchOnGPS, switchOffGPS, switchOnCamera, switchOffCamera, switchOnSDR, switchOffSDR],
-			procedurenames: ["Establish Uplink", "Establish Downlink", "Enable Ranging", "Enable Doppler", "Change TTC Mode", "Download OBC Data", "Recover from Safemode", "Power on GPS Receiver", "Power off GPS Receiver", "Power on Camera", "Power off Camera", "Power on SDR", "Power off SDR"]
+			procedures: [establishUplink, establishDownlink, enableRanging, enableDoppler, changeTtcMode, downloadData, switchOnGPS, switchOffGPS, switchOnCamera, switchOffCamera, switchOnSDR, switchOffSDR],
+			procedurenames: ["Establish Uplink", "Establish Downlink", "Enable Ranging", "Enable Doppler", "Change TTC Mode", "Dump Onboard Memory", "Power on GPS Receiver", "Power off GPS Receiver", "Power on Camera", "Power off Camera", "Power on SDR", "Power off SDR"]
 		}
 	},
 	methods: {

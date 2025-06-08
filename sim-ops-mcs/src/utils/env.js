@@ -4,6 +4,6 @@ export default function getEnv(name, default_) {
   if (_name in import.meta.env)
     return import.meta.env?.[_name]
 
-  return (window?.configs?.[name] ||  default_)
+  return (window?.configs?.[name] || default_)
 }
 

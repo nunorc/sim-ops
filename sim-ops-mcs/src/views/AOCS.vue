@@ -3,10 +3,6 @@ import { useAppVariableStore } from '@/stores/app-variable';
 import { useAppOptionStore } from '@/stores/app-option';
 import apexchart from '@/components/plugins/Apexcharts.vue';
 import chartjs from '@/components/plugins/Chartjs.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
-import axios from 'axios';
 
 const appVariable = useAppVariableStore(),
       appOption = useAppOptionStore();
@@ -65,7 +61,8 @@ export default {
 				options: { chart: { type: 'line', sparkline: { enabled: true } }, colors: [appVariable.color.theme], stroke: { curve: 'straight', width: 2 }, tooltip: { enabled: false } },
 				series: [{ name: 'nadir angle', data: [] }]
 			},
-			mqtt_status: "checking"
+			mqtt_status: "checking",
+			compact: false
 		}
 	},
 	methods: {
@@ -104,7 +101,7 @@ export default {
 						dt_str = dt.replace('T', ' ').replace('Z','') + ' UTC';
 					document.getElementById("dt-now").innerHTML = dt_str;
 
-					if (data.status_dl === 'FRAME_LOCK') {
+					if (data.ov_no_tm !== true && data.status_dl === 'FRAME_LOCK' && data.ttc_obc === 'nominal') {
 						this.updateData(data);
 						const el = document.getElementById("dt-last-up");
 						if (el)

@@ -1,9 +1,6 @@
 <script>
 import { useAppVariableStore } from '@/stores/app-variable';
 import apexchart from '@/components/plugins/Apexcharts.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
 
 const appVariable = useAppVariableStore();
 
@@ -28,12 +25,9 @@ export default {
 }
 </script>
 <template>
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">MCS <small>Monitoring & Control System</small></h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
-	<!-- BEGIN row -->
 	<div class="row" v-if="renderComponent">
 		<div class="col-xl-3 col-lg-6">
 			<card class="mb-3">
@@ -135,7 +129,6 @@ export default {
 				</card-body>
 			</card>
 		</div>
-
 	</div>
-	<!-- END row -->
+
 </template>

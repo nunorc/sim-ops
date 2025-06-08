@@ -1,21 +1,13 @@
 <script>
 import { useAppVariableStore } from '@/stores/app-variable';
 import { useAppOptionStore } from '@/stores/app-option';
-import apexchart from '@/components/plugins/Apexcharts.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
 import axios from 'axios';
 import { Modal } from 'bootstrap';
 
 const appVariable = useAppVariableStore(),
       appOption = useAppOptionStore();
 
-
 export default {
-	components: {
-		apexchart: apexchart
-	},
 	data() {
 		return {
 			renderComponent: true,
@@ -30,7 +22,8 @@ export default {
 			mqtt_status: "checking",
 			manual_stack: [ { 'command': 'none' }, { 'command': 'none' }, { 'command': 'none' } ],
 			tc_history: [ ['none', ' '], ['none', ' '], ['none', ' '] ],
-			is_armed: false
+			is_armed: false,
+			flight_dynamics: null
 		}
 	},
 	methods: {
@@ -112,16 +105,21 @@ export default {
 			return false;
 		},
 		fileUpload(type, event) {
-			this.control_send = `upload ${type} ${this.file_upload}`;
+			let filename = this.file_upload
+			if (type == 'fd-ttq')
+				filename = document.querySelector('input[name="fd_ttq_select"]:checked').value;
+
+			this.control_send = `upload ${type} ${filename}`;
 			this.control_recv = '';
 			this.control_recv_loading = true;
 
 			this.closeModal1();
 			this.closeModal2();
 			this.closeModal3();
+			this.closeModal4();
 
 			this.updateHistory(`DHS_Uplink ${type}`);
-			let body = { 'system': 'spacecraft',  'control': 'dhs_uploaded', 'value': `${type} > ${this.file_upload}`, 'command': `uploaded: ${type} > ${this.file_upload}` };
+			let body = { 'system': 'spacecraft',  'control': 'dhs_uploaded', 'value': `${type} > ${filename}`, 'command': `uploaded: ${type} > ${filename}` };
 			axios.post(`${appOption.soAPI}/control`, body)
 				.then((resp) => {
 					this.tc_history[0][1] = this.resCommand(resp.data.status);
@@ -143,6 +141,18 @@ export default {
 		openModal3() {
 			this.my_modal_3.show();
 		},
+		openModal4() {
+			axios.get(`${appOption.soAPI}/obj-store/fd`)
+				.then(response => {
+					this.flight_dynamics = response.data.filter(e => e.status > 0);
+				})
+				.catch(error => {
+					console.log(this.error);
+				})
+				.finally(() => {
+					this.my_modal_4.show();
+				});
+		},
 		closeModal1() {
 			this.my_modal_1.hide();
 		},
@@ -151,12 +161,16 @@ export default {
 		},
 		closeModal3() {
 			this.my_modal_3.hide();
+		},
+		closeModal4() {
+			this.my_modal_4.hide();
 		}
 	},
 	mounted() {
 		this.my_modal_1 = new Modal(document.getElementById("my-modal-1"));
 		this.my_modal_2 = new Modal(document.getElementById("my-modal-2"));
 		this.my_modal_3 = new Modal(document.getElementById("my-modal-3"));
+		this.my_modal_4 = new Modal(document.getElementById("my-modal-4"));
 
 		this.mqtt_status = this.$mqtt.status();
 
@@ -181,7 +195,6 @@ export default {
 }
 </script>
 <template>
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
 		SpaCon <small>Spacecraft Controller</small>
@@ -189,13 +202,12 @@ export default {
 		</small>
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
 	<div id="my-modal-1" class="modal">
 		<div class="modal-dialog">
 			<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title">CFDP Attitude Control Upload</h5>
+				<h5 class="modal-title">CFDP Command Sequence Uplink</h5>
 				<button type="button" class="btn-close" @click="closeModal1()"></button>
 			</div>
 			<div class="modal-body">
@@ -206,7 +218,7 @@ export default {
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-outline-secondary" @click="closeModal1()">Cancel</button>
-				<button @click="fileUpload('attitude-control', $event)" type="button" class="btn btn-outline-theme">Upload</button>
+				<button @click="fileUpload('command-seq', $event)" type="button" class="btn btn-outline-theme">Uplink</button>
 			</div>
 			</div>
 		</div>
@@ -216,7 +228,7 @@ export default {
 		<div class="modal-dialog">
 			<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title">CFDP Orbit Control Upload</h5>
+				<h5 class="modal-title">CFDP Orbit Control Uplink</h5>
 				<button type="button" class="btn-close" @click="closeModal2()"></button>
 			</div>
 			<div class="modal-body">
@@ -227,7 +239,7 @@ export default {
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-outline-secondary" @click="closeModal2()">Cancel</button>
-				<button @click="fileUpload('orbit-control', $event)" type="button" class="btn btn-outline-theme">Upload</button>
+				<button @click="fileUpload('orbit-control', $event)" type="button" class="btn btn-outline-theme">Uplink</button>
 			</div>
 			</div>
 		</div>
@@ -237,7 +249,7 @@ export default {
 		<div class="modal-dialog">
 			<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title">CFDP Science Control Upload</h5>
+				<h5 class="modal-title">CFDP Science Sequence Uplink</h5>
 				<button type="button" class="btn-close" @click="closeModal3()"></button>
 			</div>
 			<div class="modal-body">
@@ -248,7 +260,30 @@ export default {
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-outline-secondary" @click="closeModal3()">Cancel</button>
-				<button @click="fileUpload('science-control', $event)" type="button" class="btn btn-outline-theme">Upload</button>
+				<button @click="fileUpload('science-seq', $event)" type="button" class="btn btn-outline-theme">Uplink</button>
+			</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="my-modal-4" class="modal">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">CFDP Flight Dynamics TTQ Uplink</h5>
+				<button type="button" class="btn-close" @click="closeModal4()"></button>
+			</div>
+			<div class="modal-body">
+				<form>
+					<div class="form-check" v-for="(d, index) in flight_dynamics" :key="index">
+						<input class="form-check-input" type="radio" name="fd_ttq_select" :id="d.id" :value="d.id" :checked="index === 0">
+						<label class="form-check-label" :for="d.id">TTQ from product:{{ d.id }}</label>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-outline-secondary" @click="closeModal4()">Cancel</button>
+				<button @click="fileUpload('fd-ttq', $event)" type="button" class="btn btn-outline-theme">Uplink</button>
 			</div>
 			</div>
 		</div>
@@ -315,28 +350,40 @@ export default {
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">TTC</h6>
-							<button @click="addStack('TC_TTC_001', 'ttc_mode', 'SLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode SLBR">TC_TTC_001</button>
-							<button @click="addStack('TC_TTC_002', 'ttc_mode', 'SHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode SHBR">TC_TTC_002</button>
-							<button @click="addStack('TC_TTC_003', 'ttc_mode', 'XLBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode XLBR">TC_TTC_003</button>
-							<button @click="addStack('TC_TTC_004', 'ttc_mode', 'XHBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode XHBR">TC_TTC_004</button>
+							<button @click="addStack('TC_TTC_001', 'ttc_mode', 'S_Sup_LBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode S_Sup_LBR">TC_TTC_001</button>
+							<button @click="addStack('TC_TTC_002', 'ttc_mode', 'S_Sup_HBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode S_Sup_HBR">TC_TTC_002</button>
+							<button @click="addStack('TC_TTC_003', 'ttc_mode', 'X_Sup_LBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode X_Sup_LBR">TC_TTC_003</button>
+							<button @click="addStack('TC_TTC_004', 'ttc_mode', 'X_Sup_HBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode X_Sup_HBR">TC_TTC_004</button>
+							<button @click="addStack('TC_TTC_005', 'ttc_mode', 'S_Res_LBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode S_Res_LBR">TC_TTC_005</button>
+							<button @click="addStack('TC_TTC_006', 'ttc_mode', 'X_Res_LBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode X_Res_LBR">TC_TTC_006</button>
+							<button @click="addStack('TC_TTC_007', 'ttc_mode', 'S_Sub_LBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode S_Sub_LBR">TC_TTC_007</button>
+							<button @click="addStack('TC_TTC_008', 'ttc_mode', 'X_Sub_LBR', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Mode X_Sub_LBR">TC_TTC_008</button>
 							<button @click="addStack('TC_TTC_011', 'ttc_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Chain A">TC_TTC_011</button>
 							<button @click="addStack('TC_TTC_012', 'ttc_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Chain B">TC_TTC_012</button>
+							<button @click="addStack('TC_TTC_021', 'ttc_ping_ack', '', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Ping Spacecraft">TC_TTC_021</button>
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">TTC</h6>
-							<button @click="addStack('TC_TTC_021', 'ttc_ping_ack', '', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Ping Spacecraft">TC_TTC_021</button>
-							<button @click="addStack('TC_TTC_022', 'ttc_coherent', true, $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set Coherent Transponder">TC_TTC_022</button>
+							<button @click="addStack('TC_TTC_022', 'ttc_coherent', 'enabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Coherent Transponder">TC_TTC_022</button>
+							<button @click="addStack('TC_TTC_022', 'ttc_coherent', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Coherent Transponder">TC_TTC_023</button>
 							<button @click="addStack('TC_TTC_031', 'ttc_tx_status', 'on', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power Transmitter ON">TC_TTC_031</button>
 							<button @click="addStack('TC_TTC_032', 'ttc_tx_status', 'off', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Power Transmitter OFF">TC_TTC_032</button>
+							<button @click="addStack('TC_TTC_041', 'ttc_obc_reboot', '', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Reboot OBC">TC_TTC_041</button>
+							<button @click="addStack('TC_TTC_051', 'ttc_s_antenna', 'LGA_RHC', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Sb Antenna LGA RHC">TC_TTC_051</button>
+							<button @click="addStack('TC_TTC_052', 'ttc_s_antenna', 'LGA_LHC', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Sb Antenna LGA LHC">TC_TTC_052</button>
+							<button @click="addStack('TC_TTC_053', 'ttc_x_antenna', 'MGA', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Xb Antenna MGA">TC_TTC_053</button>
+							<button @click="addStack('TC_TTC_054', 'ttc_x_antenna', 'HGA', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set TTC Xb Antenna HGA">TC_TTC_054</button>
+							<button @click="addStack('TC_TTC_061', 'ttc_ranging', 'enabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Ranging">TC_TTC_061</button>
+							<button @click="addStack('TC_TTC_062', 'ttc_ranging', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Ranging">TC_TTC_062</button>
 						</div>
 						<div class="col">
-							<h6 class="mt-2 mb-0">PTS</h6>
-							<button @click="addStack('TC_PTS_001', 'pts_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set PTS Chain A">TC_PTS_001</button>
-							<button @click="addStack('TC_PTS_002', 'pts_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set PTS Chain B">TC_PTS_002</button>
-							<button @click="addStack('TC_PTS_011', 'pts_sol_array__0', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Solar Array 1">TC_PTS_011</button>
-							<button @click="addStack('TC_PTS_012', 'pts_sol_array__0', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Solar Array 1">TC_PTS_012</button>
-							<button @click="addStack('TC_PTS_021', 'pts_sol_array__1', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Solar Array 2">TC_PTS_021</button>
-							<button @click="addStack('TC_PTS_022', 'pts_sol_array__1', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Solar Array 2">TC_PTS_022</button>
+							<h6 class="mt-2 mb-0">EPS</h6>
+							<button @click="addStack('TC_EPS_001', 'eps_chain', 'A', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set EPS Chain A">TC_EPS_001</button>
+							<button @click="addStack('TC_EPS_002', 'eps_chain', 'B', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Set EPS Chain B">TC_EPS_002</button>
+							<button @click="addStack('TC_EPS_011', 'eps_sol_array__0', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Solar Array 1">TC_EPS_011</button>
+							<button @click="addStack('TC_EPS_012', 'eps_sol_array__0', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Solar Array 1">TC_EPS_012</button>
+							<button @click="addStack('TC_EPS_021', 'eps_sol_array__1', 'nominal', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Enable Solar Array 2">TC_EPS_021</button>
+							<button @click="addStack('TC_EPS_022', 'eps_sol_array__1', 'disabled', $event)" type="button" class="btn btn-sm btn-outline-theme me-2 mt-2" title="Disable Solar Array 2">TC_EPS_022</button>
 						</div>
 						<div class="col">
 							<h6 class="mt-2 mb-0">DHS</h6>
@@ -364,11 +411,22 @@ export default {
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">CFDP Files Uplink Service</card-header>
 				<card-body class="text-center">
-					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal1()">Command Sequence</button>
-					<span>&nbsp;&nbsp;</span>
-					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal2()">Orbit Control</button>
-					<span>&nbsp;&nbsp;</span>
-					<button type="button" class="btn btn-sm btn-outline-theme" @click="openModal3()">Science Control</button>
+					<div class="row">
+						<div class="col">
+							<button type="button" class="btn btn-sm btn-outline-theme m-1 app-my-width" @click="openModal1()">Command<br/>Sequence</button>
+						</div>
+						<div class="col">
+							<button type="button" class="btn btn-sm btn-outline-theme m-1 app-my-width" @click="openModal2()">Orbit<br/>Control</button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<button type="button" class="btn btn-sm btn-outline-theme m-1 app-my-width" @click="openModal3()">Science<br/>Sequence</button>
+						</div>
+						<div class="col">
+							<button type="button" class="btn btn-sm btn-outline-theme m-1 app-my-width" @click="openModal4()">Flight<br/>Dynamics</button>
+						</div>
+					</div>
 				</card-body>
 			</card>
 		</div>
@@ -380,6 +438,7 @@ export default {
 .app-w-100 { width: 100%; }
 .app-w-80 { width: 86px; height: 60px; }
 .app-fs-small { font-size: small; }
+.app-my-width { width: 120px; }
 tr:has(.app-tc-loaded) { border-bottom: 1px solid #3cd2a5; }
 tr:has(.app-tc-armed) { border-bottom: 1px solid #ff9f0c; }
 </style>

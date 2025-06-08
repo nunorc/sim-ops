@@ -20,7 +20,6 @@ export const useAppOptionStore = defineStore({
 		appTopNav: false,
 		appFooter: false,
 		appFooterFixed: false,
-		appThemePanelToggled: false,
 		soAPI: getEnv('SO_API', '/api'),
 		soAuth: false,
 		soCompact: false

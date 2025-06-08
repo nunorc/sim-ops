@@ -3,9 +3,6 @@ import { useAppVariableStore } from '@/stores/app-variable';
 import { useAppOptionStore } from '@/stores/app-option';
 import apexchart from '@/components/plugins/Apexcharts.vue';
 import chartjs from '@/components/plugins/Chartjs.vue';
-import jsVectorMap from 'jsvectormap';
-import 'jsvectormap/dist/maps/world.js';
-import 'jsvectormap/dist/css/jsvectormap.min.css';
 import axios from 'axios';
 
 const appVariable = useAppVariableStore(),
@@ -184,20 +181,15 @@ export default {
 }
 </script>
 <template>
-
-	<!-- BEGIN page-header -->
 	<h1 class="page-header">
 		<span v-if="loading" class="spinner-border text-secondary app-fs-small" role="status"><span class="visually-hidden">Loading...</span></span>
 		Ground Station <small>Monitor</small>
 		<small class="float-end">
-			<!-- <span class="badge rounded-0 bg-secondary">Last Update</span>
-			<span class="badge rounded-0 bg-dark" style="margin-right: 10px;">{{ dt.replace('T', ' ').replace('Z','') }} UTC</span> -->
 			<span class="badge rounded-0 bg-secondary">MQTT</span>
 			<span class="badge rounded-0" :class="{ 'bg-success': mqtt_status === 'connected', 'bg-danger': mqtt_status !== 'connected' }">{{ mqtt_status }}</span>
 		</small>
 	</h1>
 	<hr class="mb-4">
-	<!-- END page-header -->
 
 	<div class="row" v-if="renderComponent">
 		<div class="col-xl-2 col-lg-2">
@@ -205,6 +197,24 @@ export default {
 				<card-header class="card-header fw-bold small text-center p-1">D/L Status</card-header>
 				<card-body class="p-2 mx-2">
 					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': state.status_dl==='NO_RF', 'text-bg-warning': state.status_dl==='PLL_LOCK' || state.status_dl==='PSK_LOCK' || state.status_dl==='BIT_LOCK', 'text-bg-success': state.status_dl==='FRAME_LOCK' }">{{ state.status_dl }}</span>
+					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">Frame Quality</card-header>
+				<card-body class="p-2 mx-2">
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-theme': state.frame_quality==='good', 'text-bg-danger': state.frame_quality==='bad', 'text-bg-warning': state.frame_quality==='unknown' }">{{ state.frame_quality }}</span>
+					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">Frame Checks</card-header>
+				<card-body class="p-2 mx-2">
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-theme': state.frame_checks==='enabled', 'text-bg-danger': state.frame_checks!=='enabled' }">{{ state.frame_checks }}</span>
 					<span v-else>_</span>
 				</card-body>
 			</card>
@@ -220,28 +230,10 @@ export default {
 		</div>
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
-				<card-header class="card-header fw-bold small text-center p-1">Ranging</card-header>
-				<card-body class="p-2 mx-2">
-					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': !state.auto_range, 'text-bg-theme': state.auto_range }">{{ state.auto_range ? 'Enabled' : 'Disabled' }}</span>
-					<span v-else>_</span>
-				</card-body>
-			</card>
-		</div>
-		<div class="col-xl-2 col-lg-2">
-			<card class="mb-3">
-				<card-header class="card-header fw-bold small text-center p-1">Doppler</card-header>
-				<card-body class="p-2 mx-2">
-					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': !state.doppler_enabled, 'text-bg-theme': state.doppler_enabled }">{{ state.doppler_enabled ? 'Enabled' : 'Disabled' }}</span>
-					<span v-else>_</span>
-				</card-body>
-			</card>
-		</div>
-		<div class="col-xl-2 col-lg-2">
-			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">Ground Station</card-header>
 				<card-body class="p-2 mx-2">
 					<h5 class="mb-0 text-center">
-						<span v-if="state">{{ state.data_proxy }}</span>
+						<span v-if="state">{{ state.name }}</span>
 						<span v-else>_</span>
 					</h5>
 				</card-body>
@@ -326,6 +318,27 @@ export default {
 	</div>
 
 	<div class="row" v-if="renderComponent">
+		<div class="col-xl-2 col-lg-2 offset-xl-4 offset-lg-4">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">Ranging</card-header>
+				<card-body class="p-2 mx-2">
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': !state.auto_range, 'text-bg-theme': state.auto_range }">{{ state.auto_range ? 'Enabled' : 'Disabled' }}</span>
+					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+		<div class="col-xl-2 col-lg-2">
+			<card class="mb-3">
+				<card-header class="card-header fw-bold small text-center p-1">Doppler</card-header>
+				<card-body class="p-2 mx-2">
+					<span v-if="state" class="badge rounded-0 app-w-100 text-uppercase" :class="{ 'text-bg-danger': !state.doppler_enabled, 'text-bg-theme': state.doppler_enabled }">{{ state.doppler_enabled ? 'Enabled' : 'Disabled' }}</span>
+					<span v-else>_</span>
+				</card-body>
+			</card>
+		</div>
+	</div>
+
+	<div class="row" v-if="renderComponent">
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">Elevation</card-header>
@@ -379,14 +392,13 @@ export default {
 			</card>
 		</div>
 		<div class="col-xl-2 col-lg-2">
-
 		</div>
 		<div class="col-xl-2 col-lg-2">
 			<card class="mb-3">
 				<card-header class="card-header fw-bold small text-center p-1">D/L SNR</card-header>
 				<card-body>
 					<div class="row align-items-center" v-if="state">
-						<h3 class="mb-0 text-center">{{ state.snr_dl > -128 ? state.snr_dl.toFixed(2) : '_' }} <small v-if="state.snr_dl > -128" class="text-secondary app-fs-small"> dB</small></h3>
+						<h3 class="mb-0 text-center">{{ state.snr_dl > -128 ? state.snr_dl.toFixed(3) : '_' }} <small v-if="state.snr_dl > -128" class="text-secondary app-fs-small"> dB</small></h3>
 						<div class="mt-1">
 							<apexchart :height="chartSnr.height" :options="chartSnr.options" :series="chartSnr.series"></apexchart>
 						</div>
@@ -395,6 +407,7 @@ export default {
 			</card>
 		</div>
 	</div>
+
 
 	<div class="row" v-if="renderComponent">
 		<div class="col-xl-6 col-lg-6">

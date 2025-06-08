@@ -11,16 +11,23 @@
         "altitude": 127
     },
     "gs_initial_state": {
-        "carrier_ul": "off"
+        "program_track": true,
+        "carrier_ul": "off",
+        "power_ul": 50.0,
+        "mode": "S_Sup_LBR"
     },
     "sc_initial_state": {
         "aocs_chain": "A",
-        "pts_chain": "A",
+        "eps_chain": "A",
+        "eps_battery_dod": 50,
         "dhs_chain": "A",
+        "dhs_memory": 100,
         "ttc_tx_status": "on",
         "ttc_chain": "A",
         "pl_gps_status": "off",
         "pl_camera_status": "off",
-        "dhs_obsw_mode": "nominal"
+        "dhs_obsw_mode": "nominal",
+        "ttc_mode": "S_Sup_LBR",
+        "ttc_obc": "nominal"
     }
 }

@@ -11,4 +11,6 @@ RUN mkdir /app
 COPY sim-ops-lib/ /app
 WORKDIR /app
 
+RUN python -c "import skyfield.api; skyfield.api.load('de421.bsp')"
+
 ENTRYPOINT [ "python", "so-master.py" ]

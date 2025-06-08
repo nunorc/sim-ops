@@ -10,3 +10,5 @@ scipy
 pytest
 zmq
 configparser
+minio
+minsp
